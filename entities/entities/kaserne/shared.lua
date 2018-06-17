@@ -4,3 +4,6 @@ ENT.Base = "base_gmodentity"
 ENT.PrintName ="Kaserne"
 
 ENT.Spawnable = true
+
+
+

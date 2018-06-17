@@ -6,6 +6,26 @@ GM.Website = "N/A"
 
 DeriveGamemode("sandbox");
 
+local file = file
+
+function AddDir(dir) // recursively adds everything in a directory to be downloaded by client
+	local list = file.Find("*","../"..dir.."")
+	for _, fdir in pairs(list) do
+		if fdir != ".svn" then // don't spam people with useless .svn folders
+			AddDir(dir.."/"..fdir)
+		end
+	end
+ 
+	for k,v in pairs(file.Find("*","../"..dir.."/*")) do
+		resource.AddFile(dir.."/"..v)
+	end
+end
+ 
+--AddDir("models/yourmodels")
+
+-- TODO
+AddDir("lua")
+
 
 function GM:KeyRelease( player, key )
 	if ( key == IN_USE ) then
@@ -43,13 +63,7 @@ function GM:Initialize()
 	)
 	
 	-- nur mit ScreenClicker möglich
-	hook.Add("GUIMousePressed","gui_mouse_pressed_test",function(key,vector)
-			print("MAUS TEST")
-			if (key == MOUSE_RIGHT)then
-				--gui.EnableScreenClicker( false )
-			end 
-		end
-	)
+	
 	
 	hook.Add("GUIMouseReleased","gui_mouse_released_test",function(key,vector)
 			if (key == MOUSE_RIGHT)then
@@ -59,11 +73,11 @@ function GM:Initialize()
 	)
 	
 	hook.Add("PlayerButtonDown","KeyListener",function(ply,key)
-			print("BUTTON" .. key .." pressed")
+			--print("BUTTON" .. key .." pressed")
 			if (key == MOUSE_MIDDLE)then
 				--gui.EnableScreenClicker( false )
 				net.Start("Clicker_off")
-				net.Send(ply)
+				net.Send(ply)	
 			end
 		end
 	)
@@ -76,8 +90,5 @@ function GM:Initialize()
 			end
 		end
 	)
-
-	
-	
 	
 end
