@@ -1,22 +1,45 @@
 include ("shared.lua")
-
+include("lua/cl_communication.lua")
 
 function ENT:Draw()
+
+	
 	self:DrawModel()
+	--self:DrawEntityOutline(1)
 	
 end
 
-function ENT:GetFunctions()
-	local allFunctions ={}
+local matOutlineWhite 	= Material( "white_outline" )
+local ScaleNormal		= 0
+local ScaleOutline1		= 1
+local ScaleOutline2		= 1.1
+local matOutlineBlack 	= Material( "black_outline" )
+
+function ENT:DrawEntityOutline( size )
 	
-	allFunctions["Remove"] = function()
-		removeEntity(self)
+	size = size or 1.0
+	render.SuppressEngineLighting( true )
+	render.SetAmbientLight( 1, 1, 1 )
+	render.SetColorModulation( 1, 1, 1 )
 	
-	end
+		// First Outline	
+		self:SetModelScale( ScaleOutline2 * size )
+		render.MaterialOverride( matOutlineBlack )
+		self:DrawModel()
+		
+		
+		// Second Outline
+		self:SetModelScale( ScaleOutline1 * size )
+		render.MaterialOverride( matOutlineWhite )
+		self:DrawModel()
+		
+		// Revert everything back to how it should be
+		render.MaterialOverride( nil )
+		self:SetModelScale( ScaleNormal, 0 )
+		
+	render.SuppressEngineLighting( false )
 	
-	allFunctions["testent"] = function()
-		createEntity("npc_zombie",self:GetPos()+Vector(0,70,0))
-	end
-	
-	return allFunctions
+	local col = self:GetColor()
+	render.SetColorModulation( col.r/255, col.g/255, col.b/255 )
+
 end

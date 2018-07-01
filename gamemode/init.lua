@@ -1,34 +1,24 @@
 AddCSLuaFile( "cl_init.lua" )
 AddCSLuaFile( "shared.lua" )
+AddCSLuaFile( "lua/cl_gui.lua" )
+AddCSLuaFile( "lua/cl_communication.lua" )
+AddCSLuaFile( "lua/communication.lua" )
 
+
+
+include("lua/communication.lua")
 include( "shared.lua" )
+
+
 
 --include ("botTest.lua");
 
-util.AddNetworkString("CreateEntity")
-util.AddNetworkString("RemoveEntity")
-util.AddNetworkString("Clicker_off")
-util.AddNetworkString("Clicker_on")
 
-
-net.Receive("CreateEntity",function(len, ply)
-
-	--local entName = net.ReadString()
-	local infos = net.ReadTable()
-	--local tr = ply:GetEyeTrace()
-	--PrintTable (tr)
-	
-	--createEntity(entName,tr.HitPos + Vector(0,0,5))
-	createEntity(infos.name,infos.pos)
-
-
-end)
-
-net.Receive("RemoveEntity",function(len, ply)
-
-	local ent = net.ReadEntity()
+function removeEntity(ent)
 	ent:Remove()
-end)
+
+end
+
 
 function createEntity(name,pos)
 
@@ -43,4 +33,10 @@ function createEntity(name,pos)
 	ent:SetPos(pos)
 	ent:Spawn()
 		
+end
+
+function CanExecEntityFunction(ply,func)
+	
+	if (func == nil) then return false end
+	return true
 end

@@ -4,7 +4,7 @@ GM.Email = "N/A"
 GM.Website = "N/A"
 
 
-DeriveGamemode("sandbox");
+--DeriveGamemode("sandbox");
 
 local file = file
 
@@ -41,6 +41,10 @@ end
 function GM:Initialize()
 	-- Do stuff
 	--gui.EnableScreenClicker( true ) 
+	
+	ply = Player(1)
+ply.Entities = {}
+
 	
 	self.BaseClass.Initialize(self)
 	--PrintTable( hook.GetTable() )
