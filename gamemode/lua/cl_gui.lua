@@ -97,8 +97,11 @@ hook.Add("GUIMouseReleased","gui_mouse_release_select_ent",function(key,vector)
 				--posFirstClick = nil
 				posSecClick = {gui.MousePos()}
 				
-				x1,y1,x2,y2 = GetSelectBoxCoordinates()
 				
+				x1,y1,x2,y2 = GetSelectBoxCoordinates()
+				if(x2-x1 < 10 or y2-y1 <10) then return end
+				
+				selectedEntities ={}
 				
 				for k,v in pairs(ents.GetAll()) do 
 				

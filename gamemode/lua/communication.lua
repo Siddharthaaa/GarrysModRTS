@@ -50,5 +50,7 @@ net.Receive("ExecFunctionOnEntityTmp", function(len,ply)
 	local opts = net.ReadTable()
 	--local entFull = ents.GetByIndex(67)
 	local func = ent[name]
-	func(ent, unpack(opts))
+	if(func != nil) then
+		func(ent, unpack(opts))
+	end
 end)
