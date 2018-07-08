@@ -8,5 +8,3 @@ gui.EnableScreenClicker( true )
 
 
 
-
-

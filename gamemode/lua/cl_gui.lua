@@ -23,11 +23,32 @@ hook.Add("HUDPaint","PaintSelectionBox", function()
 			surface.DrawOutlinedRect(x1+1,y1+1,x2-x1-2,y2-y1-2)
 			
 		end
+		
+		if(selectedEntities) then
+		for k,v in pairs(selectedEntities) do
+			local vec = v:GetPos()
+			local pos = vec:ToScreen()
+			
+			local w = 100;
+			local h = 20
+			
+			local x1
+			x1 = w* (v:Health() / v:GetMaxHealth())
+			
+			print(v:Health())
+			surface.SetDrawColor(10,222,30)
+			surface.DrawRect(pos.x,pos.y,x1,h)
+			surface.SetDrawColor(200,2,30)
+			surface.DrawRect(pos.x +x1,pos.y,w-x1,h)
+			
+			
+		end
+		end
 
 	end
 )
 
-function GetSelectBoxCoordinates(x1,y1,x2,y2)
+function GetSelectBoxCoordinates()
 
 			local x1 = posFirstClick[1]
 			local y1 = posFirstClick[2]
@@ -57,28 +78,51 @@ hook.Add("GUIMousePressed","gui_mouse_pressed_select_ent",function(key,vector)
 			--print("MAUS TEST")
 			if (key == MOUSE_RIGHT)then
 				if(selectedEntities != nil) then
-					for k,v in pairs (selectedEntities) do
-						print(v)
-						local tr = util.QuickTrace( LocalPlayer():GetShootPos(), vector*10000, LocalPlayer() )
-						ExecEntityFunctionTmp(v,"SetTargetPos",{tr.HitPos})
+					local ent = GetEntityOnMouse()
+					
+					if(ent) then
+						for k,v in pairs (selectedEntities) do
+							--print(v)
+							
+							ExecEntityFunctionTmp(v,"SetEnemy",{ent})
+						end
+					
+					else 
+					
+						for k,v in pairs (selectedEntities) do
+								--print(v)
+								local tr = util.QuickTrace( LocalPlayer():GetShootPos(), vector*10000, LocalPlayer() )
+								ExecEntityFunctionTmp(v,"SetTargetPos",{tr.HitPos})
+						end
 					end
+						
 				end
 			end 
 			if (key == MOUSE_LEFT) then
 				
 				posFirstClick = {gui.MousePos()}
-				local tr = util.QuickTrace( LocalPlayer():GetShootPos(), vector*10000, LocalPlayer() )
-				
-				if(IsValid(tr.Entity)) then
-					SelectEntity(tr.Entity)
-				
+				print("AAAAAAAAAAAAAA")
+				SelectEntity(GetEntityOnMouse())
 				--createEntity("kaserne",tr.HitPos+Vector(0,0,5))	
-				else
-					setDefaultOptions()
-				end
+			else
+				setDefaultOptions()
 			end
+			
 		end
 	)
+	
+function GetEntityOnMouse()
+	local tr = util.QuickTrace( LocalPlayer():GetShootPos(), gui.ScreenToVector( gui.MousePos() )*1000000, LocalPlayer() )
+			--PrintTable(tr)
+	if(IsValid(tr.Entity)) then
+		print(tr.Entity)
+		return tr.Entity
+	end
+	
+	return nil
+					
+
+end
 
 hook.Add("GUIMousePressed","mousePressedAppendedEnt",function(key,vector)
 	if (key == MOUSE_RIGHT)then
@@ -111,8 +155,8 @@ hook.Add("GUIMouseReleased","gui_mouse_release_select_ent",function(key,vector)
 						 
 						x= point.x
 						y=point.y
-						print(x,y)
-						print(v)
+						--print(x,y)
+						--print(v)
 						if(x>x1 and x<x2 and y>y1 and y<x2) then
 							SelectEntity(v,true)
 						end
@@ -125,6 +169,7 @@ hook.Add("GUIMouseReleased","gui_mouse_release_select_ent",function(key,vector)
 
 function SelectEntity(ent, add)
 	
+	if(!IsValid(ent)) then return false end
 	if(add) then
 		selectedEntities[#selectedEntities+1] = ent
 	else
@@ -187,7 +232,9 @@ function appendEntOnMouse(entName, func)
 	--PrintTable(tmpEnt)
 		
 	appendedModel = ClientsideModel( tmpEnt.Model,RENDERGROUP_OPAQUE  )
-	appendedModel:SetColor(0,240,10,255)
+	appendedModel:SetColor(40,40,200)
+	appendedModel:SetKeyValue( "rendermode", RENDERMODE_TRANSTEXTURE )
+	appendedModel:SetKeyValue( "renderamt", "100" )
 	
 	appendedFunc = func
 end

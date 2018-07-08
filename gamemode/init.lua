@@ -18,6 +18,10 @@ function removeEntity(ent)
 	ent:Remove()
 
 end
+function GM:PlayerSpawn(ply)
+	ply:SetMoveType( 	MOVETYPE_NOCLIP    )
+	
+end
 
 
 function createEntity(name,pos)

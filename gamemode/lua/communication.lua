@@ -34,9 +34,9 @@ net.Receive("ExecFunctionOnEntity", function(len,ply)
 	local index = net.ReadString()
 	--local entFull = ents.GetByIndex(67)
 	
-	print (ent)
-	print ("Index: " .. index .." blabl")
-	PrintTable(ent.Functions)
+	--print (ent)
+	--print ("Index: " .. index .." blabl")
+	--PrintTable(ent.Functions)
 	if(CanExecEntityFunction(ply,ent.Functions[index])) then
 		ent.tmp =ent.Functions[index]["Function"]
 		ent:tmp(ent)

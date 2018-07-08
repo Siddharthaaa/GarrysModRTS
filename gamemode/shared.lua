@@ -4,7 +4,7 @@ GM.Email = "N/A"
 GM.Website = "N/A"
 
 
---DeriveGamemode("sandbox");
+DeriveGamemode("sandbox");
 
 local file = file
 
@@ -42,11 +42,17 @@ function GM:Initialize()
 	-- Do stuff
 	--gui.EnableScreenClicker( true ) 
 	
-	ply = Player(1)
-ply.Entities = {}
+	--ply = LocalPlayer()
+	--ply:SetMoveType(MOVETYPE_FLY)
+	--ply.Entities = {}
 
 	
 	self.BaseClass.Initialize(self)
+	
+	
+	for k,v in pairs( weapons.GetList() ) do 
+		print( v.PrintName )
+	end 
 	--PrintTable( hook.GetTable() )
 	
 	hook.Add("KeyPress","keypress_test",function(ply, key)

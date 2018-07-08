@@ -10,20 +10,37 @@ ENT.Spawnable		= true
 
 function ENT:Initialize()
 
-	self:SetModel( "models/player/Group01/Male_02.mdl" )
+	--self:SetModel( "models/player/Group01/Male_02.mdl" )
+	--self:SetModel( "models/Combine_Super_Soldier.mdl" )
+	--self:SetModel( "models/mossman.mdl" );
+	self:SetModel( "models/humans/group01/female_01.mdl" );
+	--self:SetMoveType(MOVETYPE_STEP )
 	
-
+	self:SetHealth(100)
+	self:SetMaxHealth(100)
+	
 	self.LoseTargetDist	= 2000	-- How far the enemy has to be before we lose them
 	self.SearchRadius 	= 1000	-- How far to search for enemies
+	self.Range = 500
+	
+	
+	self:Give("pistol")
+	--self:Give("weapon_smg1")
 
 end
 
+
+
+
 function ENT:SetEnemy( ent )
+	if(ent == self) then return end
 	self.Enemy = ent
+	targetPos = nil
 end
 function ENT:GetEnemy()
 	return self.Enemy
 end
+
 
 ----------------------------------------------------
 -- ENT:HaveEnemy()
@@ -79,11 +96,21 @@ function ENT:FindEnemy()
 	return false
 end
 
+
+function ENT:BehaveAct()
+end
+
+--function ENT:BehaveUpdate( interval ) 
+	--print(interval)
+
+--end
+
 ----------------------------------------------------
 -- ENT:RunBehaviour()
 -- This is where the meat of our AI is
 ----------------------------------------------------
 function ENT:RunBehaviour()
+	self:StartActivity( ACT_IDLE )
 	-- This function is called when the entity is first spawned. It acts as a giant loop that will run as long as the NPC exists
 	while ( false ) do
 		-- Lets use the above mentioned functions to see if we have/can find a enemy
@@ -119,20 +146,37 @@ function ENT:RunBehaviour()
 	while(true) do 
 		if(self.targetPos !=nil) then
 			local dis = self.targetPos:Distance(self:GetPos())
-			if(dis > 20) then
+			local tolerance = 70
+			if(dis > tolerance) then
 				
 				local opts = {	lookahead = 300,
-							tolerance = 20,
+							tolerance = tolerance,
 							draw = true,
 							maxage = 1,
 							repath = 0.2	}
-				self:MoveToPos(self.targetPos,opts)
+				self:StartActivity( ACT_RUN  )	
+					
+				--self:MoveToPos(self.targetPos,opts)
+				self.loco:FaceTowards( self.targetPos )
+				self:ChasePos(self.targetPos,opts)
+				self:StartActivity( ACT_RANGE_ATTACK1  )
+				--self:Attack()
+				self:StartActivity( ACT_IDLE )
 				--self:ChasePos(self.targetPos,opts)
 			end
 		end
 		
+		if(self:GetEnemy() and IsValid(self:GetEnemy())) then
+			self:StartActivity( ACT_RUN  )	
+			self:ChaseEnemy(self:GetEnemy())
+			
+			self:Attack()
+			self:StartActivity( ACT_IDLE )
+		end
+		
 		coroutine.yield()
 	end
+	self:StartActivity( ACT_IDLE )
 
 end
 
@@ -147,11 +191,12 @@ function ENT:ChasePos(vec, options)
 
 	if ( !path:IsValid() ) then return "failed" end
 	
-	local dist = 1000
+	local dist = self:GetPos():Distance(self.targetPos) 
+	
 	--self.loco:SetAcceleration( 900 )
 	while ( path:IsValid() and dist > options.tolerance) do
 		dist = self:GetPos():Distance(self.targetPos) 
-		print(dist,options.tolerance)
+		--print(dist,options.tolerance)
 		if ( path:GetAge() > options.repath or 0.1) then					-- Since we are following the player we have to constantly remake the path
 			path:Compute( self,self.targetPos )-- Compute the path towards the enemy's position again
 		end
@@ -182,17 +227,19 @@ end
 function ENT:ChaseEnemy( options )
 
 	local options = options or {}
+	options.maxage= options.maxage or 1
 
 	local path = Path( "Follow" )
 	path:SetMinLookAheadDistance( options.lookahead or 300 )
-	path:SetGoalTolerance( options.tolerance or 20 )
+	path:SetGoalTolerance( self.Range*0.7 or 20 )
+	
 	path:Compute( self, self:GetEnemy():GetPos() )		-- Compute the path towards the enemies position
 
 	if ( !path:IsValid() ) then return "failed" end
 
-	while ( path:IsValid() and self:HaveEnemy() ) do
+	while ( path:IsValid() and IsValid(self:GetEnemy()) and self:GetRangeTo(self:GetEnemy()) > self.Range*0.7 )do
 
-		if ( path:GetAge() > 0.1 ) then					-- Since we are following the player we have to constantly remake the path
+		if ( path:GetAge() > options.maxage ) then					-- Since we are following the player we have to constantly remake the path
 			path:Compute( self, self:GetEnemy():GetPos() )-- Compute the path towards the enemy's position again
 		end
 		path:Update( self )								-- This function moves the bot along the path
@@ -211,6 +258,72 @@ function ENT:ChaseEnemy( options )
 	return "ok"
 
 end
+
+function ENT:Give(swep_name)
+	local swep = ents.Create(swep_name)
+	
+	local handPos = self:GetAttachment(self:LookupAttachment("anim_attachment_RH")).Pos
+	
+	if(!IsValid(swep)) then return false end
+	
+
+	
+	swep:SetMoveType( MOVETYPE_NONE ) 
+	
+	swep:Spawn()
+	
+	swep:SetSolid(SOLID_NONE) --collision stuff
+	swep:SetParent(self)
+	
+	swep:Fire("setparentattachment", "anim_attachment_RH") -- binds the weapon to the attachment of its parent
+	swep:AddEffects(EF_BONEMERGE)
+	--local pos = self:EyePos()
+	--swep:SetPos(pos)
+	--swep:SetAngles(self:GetAngles())
+	swep:SetOwner(self)
+	self.Weapon = swep
+	
+
+end
+
+function ENT:HasWeapon()
+	return IsValid(self.Weapon)
+end
+
+function ENT:Attack()
+	if(self:HasWeapon()) then
+		self.Weapon:PrimaryAttack()
+	end
+end
+
+
+function ENT:GetAimVector()
+	if(IsValid(self.Weapon )) then
+		local enm =  self:GetEnemy()
+		if(!IsValid(enm)) then return nil end
+		local vec = enm:OBBCenter()+enm:GetPos()
+		 vec:Sub(self:GetShootPos())
+		 
+		 vec:Normalize()
+		 return vec
+		--return Vector(1000,1000,-1000)
+		
+	end
+
+end
+
+function ENT:GetShootPos()
+	if(IsValid(self.Weapon )) then
+		--print ("BBBBBBBBBBBBBBBBBB" )
+		--print(self.Weapon:GetPos())
+		return self.Weapon:GetPos()
+		
+	end
+	--return self:EyePos()
+
+end
+
+
 
 list.Set( "NPC", "simple_nextbot", {
 	Name = "Simple bot",
