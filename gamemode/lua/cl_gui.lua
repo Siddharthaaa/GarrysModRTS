@@ -24,29 +24,60 @@ hook.Add("HUDPaint","PaintSelectionBox", function()
 			
 		end
 		
+		DrawHealthBar()
+		ShowPlayerInfos()
+		
+
+	end
+)
+
+
+function ShowPlayerInfos()
+	
+	surface.SetFont("Trebuchet24")
+	
+	local ply = LocalPlayer()
+	
+	surface.SetTextColor( 0,222,50)
+	surface.SetTextPos( 50, 30 )
+	surface.DrawText( "Gold: " .. ply:GetNWInt("Gold"))
+	
+	--surface.DrawOutlinedRect(100,100,200,200)
+	
+	
+	
+end
+
+function DrawHealthBar()
 		if(selectedEntities) then
 		for k,v in pairs(selectedEntities) do
-			local vec = v:GetPos()
-			local pos = vec:ToScreen()
-			
-			local w = 100;
-			local h = 20
-			
-			local x1
-			x1 = w* (v:Health() / v:GetMaxHealth())
-			
-			print(v:Health())
-			surface.SetDrawColor(10,222,30)
-			surface.DrawRect(pos.x,pos.y,x1,h)
-			surface.SetDrawColor(200,2,30)
-			surface.DrawRect(pos.x +x1,pos.y,w-x1,h)
-			
+			if(IsValid(v) and v.GetHealthPoints != nil) then
+				local vec = v:GetPos()
+				local pos = vec:ToScreen()
+				
+				local w = 100;
+				local h = 10
+				
+				local x1
+				x1 = w* (v:GetHealthPoints() / v:GetMaxHealth())
+				
+				--print(v:Health())
+				surface.SetDrawColor(10,222,30)
+				surface.DrawRect(pos.x,pos.y,x1,h)
+				surface.SetDrawColor(200,2,30)
+				surface.DrawRect(pos.x +x1,pos.y,w-x1,h)
+				
+				--Weapon position
+				
+				local pos = v:GetShootPos():ToScreen()
+				
+				surface.DrawRect(pos.x,pos.y,20,20)
+			end	
 			
 		end
 		end
 
-	end
-)
+end
 
 function GetSelectBoxCoordinates()
 
@@ -93,6 +124,8 @@ hook.Add("GUIMousePressed","gui_mouse_pressed_select_ent",function(key,vector)
 								--print(v)
 								local tr = util.QuickTrace( LocalPlayer():GetShootPos(), vector*10000, LocalPlayer() )
 								ExecEntityFunctionTmp(v,"SetTargetPos",{tr.HitPos})
+								--ExecEntityFunctionTmp(v,"SetEnemy",{nil})
+								
 						end
 					end
 						
@@ -219,18 +252,33 @@ function setDefaultOptions()
 		--local tr = LocalPlayer():GetEyeTrace()
 		
 		local func = function ()
-		local tr = util.QuickTrace( LocalPlayer():GetShootPos(), gui.ScreenToVector( gui.MousePos() )*10000, LocalPlayer() )
-		createEntity("kaserne",tr.HitPos + Vector(0,0,5)) end
+			local tr = util.QuickTrace( LocalPlayer():GetShootPos(), gui.ScreenToVector( gui.MousePos() )*10000, LocalPlayer() )
+			createEntity("kaserne",tr.HitPos + Vector(0,0,5)) 
+		end
 		
 		appendEntOnMouse("kaserne", func)
+		
+	end,
+	
+	["Protobot"]=function()
+		--local tr = LocalPlayer():GetEyeTrace()
+		
+		local func = function ()
+			local tr = util.QuickTrace( LocalPlayer():GetShootPos(), gui.ScreenToVector( gui.MousePos() )*10000, LocalPlayer() )
+			createEntity("base_kibot",tr.HitPos + Vector(0,0,5)) 
+		end
+		
+		appendEntOnMouse("base_kibot", func)
 		
 	end})
 end
 
 function appendEntOnMouse(entName, func)
 	local tmpEnt = scripted_ents.Get( entName )
-	--PrintTable(tmpEnt)
-		
+	PrintTable(tmpEnt)
+		for k,v in pairs (scripted_ents.GetList()) do
+			--PrintTable(v)
+		end
 	appendedModel = ClientsideModel( tmpEnt.Model,RENDERGROUP_OPAQUE  )
 	appendedModel:SetColor(40,40,200)
 	appendedModel:SetKeyValue( "rendermode", RENDERMODE_TRANSTEXTURE )

@@ -4,7 +4,9 @@ GM.Email = "N/A"
 GM.Website = "N/A"
 
 
-DeriveGamemode("sandbox");
+--DeriveGamemode("sandbox");
+
+
 
 local file = file
 
@@ -102,3 +104,5 @@ function GM:Initialize()
 	)
 	
 end
+
+-- shared
