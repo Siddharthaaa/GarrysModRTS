@@ -3,11 +3,13 @@ AddCSLuaFile( "shared.lua" )
 AddCSLuaFile( "lua/cl_gui.lua" )
 AddCSLuaFile( "lua/cl_communication.lua" )
 AddCSLuaFile( "lua/communication.lua" )
+AddCSLuaFile( "lua/player_extension.lua" )
 
 
 
 include("lua/communication.lua")
 include( "shared.lua" )
+include( "lua/player_extension.lua" )
 
 
 
@@ -20,6 +22,7 @@ function removeEntity(ent)
 end
 function GM:PlayerSpawn(ply)
 	ply:SetMoveType( 	MOVETYPE_NOCLIP    )
+	ply:SetNWInt("Gold",1000)
 	
 end
 
@@ -30,17 +33,12 @@ function createEntity(name,pos)
 	--print(IsValid(ent))
 	--PrintTable(scripted_ents.GetList())
 	if(!IsValid(ent) or ent == NULL) then return end
-	print("Entity created: " .. name)
-	print("On Pos:" .. pos.x .. "  " .. pos.y .. "  " .. pos.z)
+--print("Entity created: " .. name)
+--print("On Pos:" .. pos.x .. "  " .. pos.y .. "  " .. pos.z)
 	
 	
 	ent:SetPos(pos)
 	ent:Spawn()
+	return ent
 		
-end
-
-function CanExecEntityFunction(ply,func)
-	
-	if (func == nil) then return false end
-	return true
 end

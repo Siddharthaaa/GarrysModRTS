@@ -1,5 +1,4 @@
-
-
+AddCSLuaFile()
 net.Receive("Clicker_off",function(len)
 	gui.EnableScreenClicker( false )
 
@@ -23,7 +22,7 @@ function createEntity(name,pos)
 end
 
 function removeEntity(ent)
-	print(ent)
+--print(ent)
 	net.Start("RemoveEntity")
 	--net.WriteString(name)
 	net.WriteEntity(ent)

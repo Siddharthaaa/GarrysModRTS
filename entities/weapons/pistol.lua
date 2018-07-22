@@ -39,16 +39,28 @@ SWEP.base = "weapon_base" //What your weapon is based on.
 SWEP.Primary.Sound = "sound/seeya.wav" // The sound that plays when you shoot your SWEP :-] 
 SWEP.Primary.Damage = 4 // How much damage the SWEP will do.
 SWEP.Primary.TakeAmmo = 1 // How much ammo does the SWEP use each time you shoot?
-SWEP.Primary.ClipSize = 100 // The clip size.
+SWEP.Primary.ClipSize = 10 // The clip size.
 SWEP.Primary.Ammo = "Pistol" // The ammo used by the SWEP. (pistol/smg1) 
-SWEP.Primary.DefaultClip = 100 // How much ammo do you get when you first pick up the SWEP? 
-SWEP.Primary.Spread = 0.3 // Do the bullets spread all over when firing? If you want it to shoot exactly where you are aiming, leave it at 0.1 
+SWEP.Primary.DefaultClip = 10 // How much ammo do you get when you first pick up the SWEP? 
+SWEP.Primary.Spread = 0.5 // Do the bullets spread all over when firing? If you want it to shoot exactly where you are aiming, leave it at 0.1 
 SWEP.Primary.NumberofShots = 1 // How many bullets the SWEP fires each time you shoot. 
 SWEP.Primary.Automatic = true // Is the SWEP automatic?
 SWEP.Primary.Recoil = 10 // How much recoil does the weapon have?
-SWEP.Primary.Delay = 0.3 // How long must you wait before you can fire again?
-SWEP.Primary.Force = 1 // The force of the shot.
-SWEP.Primary.TracerName = "Tracer"
+SWEP.Primary.Delay = 0.2 // How long must you wait before you can fire again?
+SWEP.Primary.Force = 1000 // The force of the shot.
+SWEP.Primary.TracerName = "AR2Tracer"
+SWEP.Primary.Distance = 56756
+
+// Tracer Names/*
+--AR2Tracer - Self-descripting. Visible from all directions except under it
+--AirboatGunHeavyTracer - Makes a bigger version of the Pulse-rifle Tracer.
+--AirboatGunTracer - Similar to the Pulse-rifle Tracer, only visible from above. 
+--Tracer - 9mm pistol tracer
+--StriderTracer - Similar to AR2 tracer
+--HelicopterTracer - Similar to GunshipTracer effect
+--GunshipTracer - 2x the size of the pulse-rifle tracer
+--LaserTracer - The tool tracer effect from the Tool Gun
+
 //PrimaryFire settings\\
  
 //Secondary Fire Variables\\ 
@@ -74,17 +86,38 @@ function SWEP:Initialize() //Tells the script what to do when the player "Initia
         self:SetWeaponHoldType( self.HoldType )
 end 
 //SWEP:Initialize\\
+
+function SWEP:GetCapabilities()
+
+	return bit.bor( CAP_WEAPON_RANGE_ATTACK1, CAP_INNATE_RANGE_ATTACK1 )
+
+end
  
 //SWEP:PrimaryFire\\ 
 function SWEP:PrimaryAttack()
  
 	if ( !self:CanPrimaryAttack() ) then return end
- 
+--print(self:IsWeapon())
+	--local muzzle = self:LookupAttachment("muzzle")
+	--local obj = self:GetAttachment(muzzle)
+	
+	local dir, scr
+	
+	if self.Owner:IsPlayer() then
+		dir = self.Owner:GetAimVector()
+		scr = self.Owner:GetShootPos()		
+	else
+		
+		dir = self.Owner:GetAimVector()
+		scr = self.Owner:GetShootPos()		
+		--scr = self:GetPos()
+	end
+	
 	local bullet = {} 
 		bullet.Num = self.Primary.NumberofShots //The number of shots fired
 		--bullet.Num = 10//The number of shots fired
-		bullet.Src = self.Owner:GetShootPos() //Gets where the bullet comes from
-		bullet.Dir = self.Owner:GetAimVector() //Gets where you're aiming
+		bullet.Src = scr //Gets where the bullet comes from
+		bullet.Dir = dir //Gets where you're aiming
 		bullet.Spread = Vector( self.Primary.Spread * 0.1 , self.Primary.Spread * 0.1, 0)
                 //The above, sets how far the bullets spread from each other. 
 		bullet.Tracer = 1
@@ -93,6 +126,8 @@ function SWEP:PrimaryAttack()
 		bullet.AmmoType = self.Primary.Ammo 
 		bullet.TracerName = self.Primary.TracerName
 		bullet.HullSize =1
+		bullet.Distance= self.Owner.Range
+		bullet.IgnoreEntity = Entity(1)
 		
 		--print(bullet.Src)
 		--print(bullet.Dir)
@@ -118,7 +153,7 @@ end
 //SWEP:SecondaryFire\\ 
 function SWEP:SecondaryAttack() 
 	if ( !self:CanSecondaryAttack() ) then return end 
- 
+	
 	local rnda = -self.Secondary.Recoil 
 	local rndb = self.Secondary.Recoil * math.random(-1, 1) 
  
@@ -145,11 +180,15 @@ end
 function SWEP:CanPrimaryAttack()
 	--print(self:GetNextPrimaryFire())
 	if(self:GetNextPrimaryFire() > CurTime()) then return false end
-	if ( self.Weapon:Clip1() <= 0 ) then
+--print(self:Clip1())
+	if ( self:Clip1() <= 0 ) then
 
 		self:EmitSound( "Weapon_Pistol.Empty" )
-		self:SetNextPrimaryFire( CurTime() + 0.2 )
+		self:SetNextPrimaryFire( CurTime() + 2 )
+		self:GetOwner():StartActivity( ACT_RELOAD_PISTOL)
 		self:Reload()
+		self:SetClip1(self.Primary.ClipSize)
+		coroutine.wait(0.3)
 		return false
 
 	end

@@ -4,7 +4,9 @@ GM.Email = "N/A"
 GM.Website = "N/A"
 
 
-DeriveGamemode("sandbox");
+--DeriveGamemode("sandbox");
+
+
 
 local file = file
 
@@ -29,9 +31,9 @@ AddDir("lua")
 
 function GM:KeyRelease( player, key )
 	if ( key == IN_USE ) then
-		print( "hi" )
-		print (player)
-		print ("hi2")
+	--print( "hi" )
+	--print (player)
+	--print ("hi2")
 	end
 end
 
@@ -51,7 +53,7 @@ function GM:Initialize()
 	
 	
 	for k,v in pairs( weapons.GetList() ) do 
-		print( v.PrintName )
+	--print( v.PrintName )
 	end 
 	--PrintTable( hook.GetTable() )
 	
@@ -102,3 +104,5 @@ function GM:Initialize()
 	)
 	
 end
+
+-- shared

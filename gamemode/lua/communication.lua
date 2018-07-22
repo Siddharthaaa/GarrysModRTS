@@ -37,12 +37,25 @@ net.Receive("ExecFunctionOnEntity", function(len,ply)
 	--print (ent)
 	--print ("Index: " .. index .." blabl")
 	--PrintTable(ent.Functions)
-	if(CanExecEntityFunction(ply,ent.Functions[index])) then
-		ent.tmp =ent.Functions[index]["Function"]
-		ent:tmp(ent)
-		
+	local func = ent.Functions[index]
+--print(CanExecEntityFunction(ply,func))
+	if(CanExecEntityFunction(ply,func)) then
+	
+		if(ply:PayCosts(func.Costs)) then
+			
+			ent:AddTask(func.Name,func.Function,{ent},func.TimeCost,true)
+			
+			--ent.tmp =func["Function"]
+			--ent:tmp(ent)
+		end
 	end
 end)
+
+function CanExecEntityFunction(ply,func)
+	if (func == nil) then return false end
+	if(ply:CanPayCosts(func.Costs)==false) then return false end
+	return true
+end
 
 net.Receive("ExecFunctionOnEntityTmp", function(len,ply)
 	local ent = net.ReadEntity()
