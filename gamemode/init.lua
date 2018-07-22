@@ -33,8 +33,8 @@ function createEntity(name,pos)
 	--print(IsValid(ent))
 	--PrintTable(scripted_ents.GetList())
 	if(!IsValid(ent) or ent == NULL) then return end
-	print("Entity created: " .. name)
-	print("On Pos:" .. pos.x .. "  " .. pos.y .. "  " .. pos.z)
+--print("Entity created: " .. name)
+--print("On Pos:" .. pos.x .. "  " .. pos.y .. "  " .. pos.z)
 	
 	
 	ent:SetPos(pos)

@@ -3,7 +3,6 @@ AddCSLuaFile()
 selectedEntities = nil
 
 posFirstClick = {0,0}
-posSecClick = {0,0}
 
 appendedModel=nil
 
@@ -41,6 +40,7 @@ function ShowPlayerInfos()
 	surface.SetTextColor( 0,222,50)
 	surface.SetTextPos( 50, 30 )
 	surface.DrawText( "Gold: " .. ply:GetNWInt("Gold"))
+
 	
 	--surface.DrawOutlinedRect(100,100,200,200)
 	
@@ -98,15 +98,21 @@ end
 
 hook.Add( "PreRender", "appendedEnt", function()
 	if(appendedModel != nil) then
-		local tr = util.QuickTrace( LocalPlayer():GetShootPos(), gui.ScreenToVector( gui.MousePos() )*10000, LocalPlayer() )
+		local tr = util.QuickTrace( LocalPlayer():GetShootPos(), gui.ScreenToVector( gui.MousePos() )*100000, LocalPlayer() )
 		--print( tr.HitPos )
 		appendedModel:SetPos(tr.HitPos)
 	end
 end)
 
+hook.Add("VGUIMousePressed","clean_bugs",function(pnl, mousecode)
+	posFirstClick=nil
+	
+end)
+
 
 hook.Add("GUIMousePressed","gui_mouse_pressed_select_ent",function(key,vector)
-			--print("MAUS TEST")
+			
+			--Give a Order to the Selected Entitys
 			if (key == MOUSE_RIGHT)then
 				if(selectedEntities != nil) then
 					local ent = GetEntityOnMouse()
@@ -131,12 +137,13 @@ hook.Add("GUIMousePressed","gui_mouse_pressed_select_ent",function(key,vector)
 						
 				end
 			end 
+			--
 			if (key == MOUSE_LEFT) then
 				
 				posFirstClick = {gui.MousePos()}
-				print("AAAAAAAAAAAAAA")
+			
 				SelectEntity(GetEntityOnMouse())
-				--createEntity("kaserne",tr.HitPos+Vector(0,0,5))	
+					
 			else
 				setDefaultOptions()
 			end
@@ -148,7 +155,7 @@ function GetEntityOnMouse()
 	local tr = util.QuickTrace( LocalPlayer():GetShootPos(), gui.ScreenToVector( gui.MousePos() )*1000000, LocalPlayer() )
 			--PrintTable(tr)
 	if(IsValid(tr.Entity)) then
-		print(tr.Entity)
+	--print(tr.Entity)
 		return tr.Entity
 	end
 	
@@ -171,8 +178,8 @@ end)
 	
 hook.Add("GUIMouseReleased","gui_mouse_release_select_ent",function(key,vector)
 		if (key == MOUSE_LEFT) then
-				--posFirstClick = nil
-				posSecClick = {gui.MousePos()}
+				
+				--posSecClick = {gui.MousePos()}
 				
 				
 				x1,y1,x2,y2 = GetSelectBoxCoordinates()
@@ -196,6 +203,7 @@ hook.Add("GUIMouseReleased","gui_mouse_release_select_ent",function(key,vector)
 					end
 					
 				end
+				posFirstClick = nil
 		end
 	end
 )
@@ -274,13 +282,14 @@ function setDefaultOptions()
 end
 
 function appendEntOnMouse(entName, func)
+	removeEntOnMouse()
 	local tmpEnt = scripted_ents.Get( entName )
 	PrintTable(tmpEnt)
 		for k,v in pairs (scripted_ents.GetList()) do
 			--PrintTable(v)
 		end
 	appendedModel = ClientsideModel( tmpEnt.Model,RENDERGROUP_OPAQUE  )
-	appendedModel:SetColor(40,40,200)
+	appendedModel:SetColor(40,40,200,100)
 	appendedModel:SetKeyValue( "rendermode", RENDERMODE_TRANSTEXTURE )
 	appendedModel:SetKeyValue( "renderamt", "100" )
 	

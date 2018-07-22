@@ -97,7 +97,7 @@ end
 function SWEP:PrimaryAttack()
  
 	if ( !self:CanPrimaryAttack() ) then return end
-	print(self:IsWeapon())
+--print(self:IsWeapon())
 	--local muzzle = self:LookupAttachment("muzzle")
 	--local obj = self:GetAttachment(muzzle)
 	
@@ -180,7 +180,7 @@ end
 function SWEP:CanPrimaryAttack()
 	--print(self:GetNextPrimaryFire())
 	if(self:GetNextPrimaryFire() > CurTime()) then return false end
-	print(self:Clip1())
+--print(self:Clip1())
 	if ( self:Clip1() <= 0 ) then
 
 		self:EmitSound( "Weapon_Pistol.Empty" )

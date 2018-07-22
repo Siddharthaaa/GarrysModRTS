@@ -29,8 +29,8 @@ self.Functions["0"] = {["Name"]="Destroy",
 		["Description"]="Destroy Unit",
 		["ExecOn"] ="server",
 		["Function"] = function(self) removeEntity(self) end,
-		["TimeCost"] = 2.0,
-		["Costs"] = {["Gold"]=100}
+		["TimeCost"] = 0,
+		["Costs"] = {["Gold"]=0}
 		
 		}
 
@@ -45,7 +45,7 @@ self.Functions["1"] = {["Name"]="Soldat",
 						end,
 		
 		["ExecOn"] ="server",
-		["TimeCost"] = 2.0,
+		["TimeCost"] = 5.0,
 		["Costs"] = {["Gold"]=100}
 		
 		}

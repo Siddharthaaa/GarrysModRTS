@@ -1,7 +1,7 @@
 AddCSLuaFile()
 
-ENT.Type			= "ai"
-ENT.Base 			= "base_entity"
+--ENT.Type			= "ai"
+--ENT.Base 			= "base_entity"
 
 ENT.Type			= "nextbot"
 ENT.Base 			= "base_nextbot"
@@ -71,11 +71,6 @@ function ENT:GetShootPos()
 		
 		return scr
 		
-		
-		--print ("BBBBBBBBBBBBBBBBBB" )
-		--print(self.GetWeapon():GetPos())
-		--return self:GetPos()+ Vector(100,100,0)
-		--return self:GetWeapon():GetPos()
 		
 	end
 	return self:EyePos()
