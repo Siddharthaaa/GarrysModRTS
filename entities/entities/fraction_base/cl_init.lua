@@ -121,7 +121,7 @@ function ENT:GreateSelectedUnitsPanel(show)
 
 	local panel = vgui.Create("DPanel")
 	panel:SetSize(w,h)
-	panel:SetPos(ScrW()/2+100,ScrH()-h)
+	panel:SetPos(ScrW()/2+200,ScrH()-h)
 	
 	self.InterfaceElements[name]= panel
 	panel:SetVisible(show)
@@ -132,9 +132,7 @@ function ENT:GreateSelectedUnitsPanel(show)
 		local entFunctions = ent.Functions or {}
 		
 		for k, v in pairs(entFunctions) do
-			--print ("BBBBB:" .. k)
-			--PrintTable(v)
-			--print(v["Name"] .. k .. "   AAAAA")
+			
 			if(v["ExecOn"] == "server") then
 				funcs[v["Name"] ] = function()
 					

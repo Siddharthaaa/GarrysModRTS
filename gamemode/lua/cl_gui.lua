@@ -212,7 +212,7 @@ function SelectEntity(ent, add)
 	if(!IsValid(ent)) then return false end
 	
 	ent:Select()
-	--[[
+	
 	if(add) then
 		selectedEntities[#selectedEntities+1] = ent
 		
@@ -220,6 +220,7 @@ function SelectEntity(ent, add)
 		UnSelectAllEntities()
 		selectedEntities= {ent}
 	end
+	--[[
 	local funcs = {}
 	local entFunctions = ent.Functions or {}
 	
