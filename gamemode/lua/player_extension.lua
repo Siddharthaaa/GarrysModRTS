@@ -2,6 +2,8 @@ AddCSLuaFile()
 
 local ply = FindMetaTable("Player")
 
+ply.Fraction = nil
+
 function ply:SetupDataTables()
 	local fl=31
 	local ent =31
@@ -14,8 +16,23 @@ function ply:SetupDataTables()
     self:NetworkVar("Int",int , "Gold") ;int = int -1
     self:NetworkVar("Int",int , "Wood") ;int = int -1
     self:NetworkVar("Int",int , "Iron") ;int = int -1
+	self:NetworkVar("Entity",ent,"Fraction");ent = ent- 1
 	
 	
+end
+
+function GM:PlayerInitialSpawn( ply )
+	
+	local fraction = ents.Create("fraction_base")
+	fraction:Spawn()
+	ply:SetFraction(fraction)
+	--fraction:ShowInterface(ply)
+	
+end
+
+function ply:Think()
+	
+
 end
  
  function ply:CanPayCosts(costs)
@@ -42,4 +59,13 @@ end
 	return true
 
 end
- 
+
+function ply:SetFraction(frac)
+
+	self:SetNWEntity("Fraction",frac)
+
+end
+
+function ply:GetFraction()
+	return self:GetNWEntity("Fraction")
+end

@@ -13,12 +13,9 @@ net.Receive("CreateEntity",function(len, ply)
 
 	--local entName = net.ReadString()
 	local infos = net.ReadTable()
-	--local tr = ply:GetEyeTrace()
-	--PrintTable (tr)
 	
-	--createEntity(entName,tr.HitPos + Vector(0,0,5))
-	createEntity(infos.name,infos.pos)
-
+	local ent = createEntity(infos.name,infos.pos)
+	ent:SetFraction(ply:GetFraction())
 
 end)
 
@@ -32,16 +29,12 @@ net.Receive("ExecFunctionOnEntity", function(len,ply)
 	local ent = net.ReadEntity()
 	
 	local index = net.ReadString()
-	--local entFull = ents.GetByIndex(67)
 	
-	--print (ent)
-	--print ("Index: " .. index .." blabl")
-	--PrintTable(ent.Functions)
 	local func = ent.Functions[index]
 --print(CanExecEntityFunction(ply,func))
 	if(CanExecEntityFunction(ply,func)) then
 	
-		if(ply:PayCosts(func.Costs)) then
+		if(ply:GetFraction():PayCosts(func.Costs)) then
 			
 			ent:AddTask(func.Name,func.Function,{ent},func.TimeCost,true)
 			
@@ -53,7 +46,11 @@ end)
 
 function CanExecEntityFunction(ply,func)
 	if (func == nil) then return false end
-	if(ply:CanPayCosts(func.Costs)==false) then return false end
+	
+	local frac = ply:GetFraction()
+	
+	
+	if(frac:CanPayCosts(func.Costs)==false) then return false end
 	return true
 end
 

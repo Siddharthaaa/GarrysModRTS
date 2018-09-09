@@ -7,7 +7,7 @@ include("shared.lua")
 ENT.Base 			= "base_nextbot"
 ENT.Spawnable		= true
 
---ENT.Model="models/humans/group01/female_01.mdl" 
+
 
 function ENT:UpdateTransmitState()
 	return TRANSMIT_PVS
@@ -53,6 +53,7 @@ function ENT:OnKilled(damage )
 		body:Remove()
 
 	end )
+	--self:BecomeRagdoll( dmginfo )
 	
 end
 
@@ -69,7 +70,7 @@ function ENT:OnInjured(damage )
 		--self:Kill()
 	end
 	self:SetHealthPoints(self:Health())
-	self:AddEFlags( EFL_FORCE_CHECK_TRANSMIT )
+	--self:AddEFlags( EFL_FORCE_CHECK_TRANSMIT )
 	--PrintTable(self:GetSequenceList())
 	
 end

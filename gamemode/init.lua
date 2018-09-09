@@ -20,9 +20,13 @@ function removeEntity(ent)
 	ent:Remove()
 
 end
+
 function GM:PlayerSpawn(ply)
 	ply:SetMoveType( 	MOVETYPE_NOCLIP    )
 	ply:SetNWInt("Gold",1000)
+	--if (ply:GetFraction() == nil) then
+		--ply:SetFraction(ents.Create("fraction"))
+	--end
 	
 end
 

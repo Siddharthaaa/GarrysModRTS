@@ -8,6 +8,7 @@ ENT.Base 			= "base_nextbot"
 ENT.Spawnable		= true
 
 ENT.Selectable	= true
+ENT.IsSelected=false
 ENT.Model="models/humans/group01/female_01.mdl" 
 ENT.Model="models/alyx.mdl" 
 ENT.Spawnable = true
@@ -15,6 +16,9 @@ ENT.Spawnable = true
 ENT.Weapon = nil
 
 ENT.AutomaticFrameAdvance = true
+
+ENT.Description = "Der Erste Bot \nLäuft komisch und schießt aus den Augen"
+
 
 function ENT:SetupDataTables()
 	local fl=0
@@ -27,7 +31,7 @@ function ENT:SetupDataTables()
 	
     self:NetworkVar("Float",fl , "HealthPoints") ;fl=fl+1-- 
 	self:NetworkVar("Entity",ent,"Weapon"); ent=ent+1
-	
+	self:NetworkVar("Entity",ent,"Fraction"); ent=ent+1
 	
 
 end

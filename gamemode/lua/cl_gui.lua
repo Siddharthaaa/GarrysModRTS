@@ -1,29 +1,27 @@
 AddCSLuaFile()
 
-selectedEntities = nil
+selectedEntities = {}
 
 posFirstClick = {0,0}
 
-appendedModel=nil
 
+--at the cursor appended model and funcion
+appendedModel=nil
 appendedFunc=nil
 
 hook.Add("HUDPaint","PaintSelectionBox", function()
 		if(input.IsMouseDown(MOUSE_LEFT) and posFirstClick != nil) then
 			
 			--print(posFirstClick)
-			
-		
 			x1,y1,x2,y2 = GetSelectBoxCoordinates()
-			
-			
+					
 			surface.SetDrawColor(7, 188, 97)
 			surface.DrawOutlinedRect(x1,y1,x2-x1,y2-y1)
 			surface.DrawOutlinedRect(x1+1,y1+1,x2-x1-2,y2-y1-2)
 			
 		end
 		
-		DrawHealthBar()
+		--DrawHealthBars()
 		ShowPlayerInfos()
 		
 
@@ -48,7 +46,7 @@ function ShowPlayerInfos()
 	
 end
 
-function DrawHealthBar()
+function DrawHealthBars()
 		if(selectedEntities) then
 		for k,v in pairs(selectedEntities) do
 			if(IsValid(v) and v.GetHealthPoints != nil) then
@@ -141,11 +139,12 @@ hook.Add("GUIMousePressed","gui_mouse_pressed_select_ent",function(key,vector)
 			if (key == MOUSE_LEFT) then
 				
 				posFirstClick = {gui.MousePos()}
-			
+				UnSelectAllEntities()
 				SelectEntity(GetEntityOnMouse())
 					
 			else
-				setDefaultOptions()
+				--old function. please dont use this
+				--setDefaultOptions()
 			end
 			
 		end
@@ -211,34 +210,66 @@ hook.Add("GUIMouseReleased","gui_mouse_release_select_ent",function(key,vector)
 function SelectEntity(ent, add)
 	
 	if(!IsValid(ent)) then return false end
+	
+	ent:Select()
+	--[[
 	if(add) then
 		selectedEntities[#selectedEntities+1] = ent
+		
 	else
+		UnSelectAllEntities()
 		selectedEntities= {ent}
 	end
 	local funcs = {}
 	local entFunctions = ent.Functions or {}
 	
 	for k, v in pairs(entFunctions) do
+		--print ("BBBBB:" .. k)
+		--PrintTable(v)
+		--print(v["Name"] .. k .. "   AAAAA")
 		if(v["ExecOn"] == "server") then
-			funcs[v["Name"]] = function()
-				--print(v["Name"] .. k .. "   AAAAA")
-				ExecEntityFunction(ent,k)
+			funcs[v["Name"] ] = function()
+				
+				ExecEntityFunction(ent,k) 
 			end
 		
 		else
-			funcs[v["Name"]] = funcs[v["Function"]]
-		end
+			funcs[v["Name"] ] = funcs[v["Function"] ]
+		end 
 		
 	end
 	
-	SetOptionsOnPanel(funcs)
+	--SetOptionsOnPanel(funcs)
+	--]]
+end
+
+function UnSelectEntity(ent)
+	if(!IsValid(ent)) then return end 
+	ent:UnSelect()
+	
+	table.remove(selectedEntities,getElemIndexInTable(selectedEntities,ent))
+end
+
+function UnSelectAllEntities()
+		for k,v in pairs(selectedEntities) do 
+			UnSelectEntity(v)
+		
+		end
+end
+
+function getElemIndexInTable(tab, element)
+	for pos, v in pairs(tab) do 
+		if v == element then
+			return pos
+		end
+	end
 
 end
 
+--[[
 function SetOptionsOnPanel(funcs)
 	local existingElements = optionsGrid:GetItems()
-	PrintTable(existingElements)
+	--PrintTable(existingElements)
 	--print (#existingElements)
 	for i=#existingElements,1,-1  do
 		optionsGrid:RemoveItem(existingElements[i])
@@ -281,10 +312,12 @@ function setDefaultOptions()
 	end})
 end
 
+--]]
+
 function appendEntOnMouse(entName, func)
 	removeEntOnMouse()
 	local tmpEnt = scripted_ents.Get( entName )
-	PrintTable(tmpEnt)
+	--PrintTable(tmpEnt)
 		for k,v in pairs (scripted_ents.GetList()) do
 			--PrintTable(v)
 		end
@@ -304,13 +337,16 @@ function removeEntOnMouse()
 	end 
 end
 
+-- old gui
+
+--[[
 
 panel = vgui.Create("DPanel")
 
 
 panel:SetVisible(true)
 panel:SetSize(600,100)
-panel:SetPos(100,ScrH()-120)
+panel:SetPos(400,ScrH()-120)
 panel:SetBackgroundColor(Color(120,120,120,120))
 --panel:SetCols(6)
 
@@ -323,3 +359,8 @@ optionsGrid:SetRowHeight(50)
 optionsGrid:SetColWide(50)
 
 setDefaultOptions()
+
+--NEW GUI
+
+--]]
+
