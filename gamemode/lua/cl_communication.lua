@@ -9,6 +9,17 @@ net.Receive("Clicker_on",function(len)
 
 end)
 
+net.Receive("SetSynchronizedVariablesOnEntity",function(len)
+	local ent = net.ReadEntity()
+	local table = net.ReadTable()
+	--print("AAAAAAAAAAAAAAAAAAAAAA")
+	--PrintTable(table)
+	for k,v in pairs(table) do
+		ent[k] = v
+	end
+
+end)
+
 function createEntity(name,pos)
 	
 	net.Start("CreateEntity")

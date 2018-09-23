@@ -31,8 +31,8 @@ function GM:PlayerSpawn(ply)
 end
 
 
-function createEntity(name,pos)
-
+function createEntity(name,pos, angle)
+	angle = angle || Angle(0, 0, 0)
 	local ent = ents.Create(name)
 	--print(IsValid(ent))
 	--PrintTable(scripted_ents.GetList())

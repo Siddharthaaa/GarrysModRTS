@@ -1,6 +1,6 @@
 --AddCSLuaFile()
 
-ENT.Tasks = {}
+
 ENT.TaskTimerId = nil
 --Hook
 function ENT:EndTask(task)
@@ -19,6 +19,8 @@ function ENT:AddTask(name, func, args, delay, autostart)
 	
 	autostart = autostart or false
 	
+	self.Tasks = self.Tasks or {}
+
 	local task = {}
 	task.name = name
 	task.func = func
@@ -26,6 +28,8 @@ function ENT:AddTask(name, func, args, delay, autostart)
 	
 	task.delay = delay or 0
 	
+
+
 	table.insert(self.Tasks,task)
 	if(#self.Tasks == 1 and autostart) then
 		self:NextTask()

@@ -19,9 +19,10 @@ end
 function ENT:CreateInterface(ply)
 	
 	if(self.HasInterface == false) then
-		self:CreateBuildingPanel(false)
-		self:CreateMapPanel(false)
-		self:GreateSelectedUnitsPanel(false)
+		self.InterfaceElements.Building=self:CreateBuildingPanel(false)
+		self.InterfaceElements.Map = self:CreateMapPanel(false)
+		self.InterfaceElements.UnitsPanel = self:CreateSelectedUnitsPanel(false)
+		self.InterfaceElements.InfoBox = self:CreateInfoBox(false)
 		self.HasInterface = true
 	end
 end
@@ -75,9 +76,6 @@ end
 
 function ENT:CreateMapPanel(show)
 	local h, w = 200,200
-
-	local name = "Map"
-	if(self.InterfaceElements[name] != nil ) then return end
 	
 	local panel = vgui.Create("DPanel")
 	panel:SetSize(h,w)
@@ -109,25 +107,55 @@ function ENT:CreateMapPanel(show)
 	
 	end
 	panel:SetVisible(show)
-	self.InterfaceElements[name]= panel
+	
 	return panel
 end
 
-function ENT:GreateSelectedUnitsPanel(show)
+function ENT:CreateSelectedUnitsPanel(show)
 
 	local w,h = 300, 200
-	local name = "UnitsPanel"
-	if(self.InterfaceElements[name] != nil ) then return end
 
 	local panel = vgui.Create("DPanel")
 	panel:SetSize(w,h)
 	panel:SetPos(ScrW()/2+200,ScrH()-h)
+	panel:DockPadding(5,5,5,5)
+	panel:DockMargin(5,5,5,5)
+
+	local FunktionsPanel = vgui.Create( "DIconLayout", panel )
+	FunktionsPanel:Dock( FILL )
+	FunktionsPanel:SetSpaceY( 5 ) -- Sets the space in between the panels on the Y Axis by 5
+	FunktionsPanel:SetSpaceX( 5 ) -- Sets the space in between the panels on the X Axis by 5
 	
-	self.InterfaceElements[name]= panel
+	panel.FunktionsPanel= FunktionsPanel
+	
+	local PortraitHullPanel = vgui.Create("DPanel", panel)
+	local PortraitBox = vgui.Create("DImage", PortraitHullPanel)
+	PortraitHullPanel:Dock(LEFT)
+	PortraitHullPanel:SizeToContents()
+	PortraitBox:SetSize(70,70)
+	panel.PortraitBox = PortraitBox
+	panel.PortraitHullPanel = PortraitHullPanel
+
+	local InfoBox = vgui.Create("DListLayout",panel)
+	InfoBox:Dock(TOP)
+	InfoBox:DockMargin(5,5,5,5)
+	panel.InfoBox = InfoBox
+
+	local NameLabel = vgui.Create("DLabel", InfoBox)
+	InfoBox.NameLabel = NameLabel
+
+	local HPBar = vgui.Create("DProgress", InfoBox )
+	InfoBox.HPBar = HPBar
+
+
+	local DescriptionLabel = vgui.Create("DLabel", InfoBox)
+	DescriptionLabel:SetWrap(true)
+	InfoBox.DescriptionLabel = DescriptionLabel
+	
 	panel:SetVisible(show)
 	panel:SetBackgroundColor(Color(0,0,0,220))
 	
-	function panel:SetFunctionsButtons()
+	function panel:SetFunctionsButtons(ent)
 		local funcs = {}
 		local entFunctions = ent.Functions or {}
 		
@@ -145,26 +173,77 @@ function ENT:GreateSelectedUnitsPanel(show)
 			
 		end
 		
-		local existingElements = optionsGrid:GetItems()
-	--PrintTable(existingElements)
-	--print (#existingElements)
-		for i=#existingElements,1,-1  do
-			optionsGrid:RemoveItem(existingElements[i])
-			--print (i)
-			--print (" deleted")
-		
-		end
+		self.FunktionsPanel:Clear()
 		for name, func in pairs(funcs) do
 			local butt = vgui.Create("DButton")
 			butt:SetSize(50,50)
 			butt:SetText(name)
 			butt.DoClick = func
-			optionsGrid:AddItem(butt)
+			self.FunktionsPanel:Add(butt)
 		end
 		
 	end
-	
+
 	return panel 
+
+end
+
+function ENT:CreateInfoBox(show)
+
+	local panel  = vgui.Create("DPanel")
+	
+	panel:SetPos(20,20)
+	panel:SetSize(120,100)
+	panel:SetBackgroundColor(Color(30,0,40,255))
+	panel:DockPadding(5,5,5,5)
+	panel:DockMargin(5,5,5,5)
+
+	
+
+	local namesP = vgui.Create("DListLayout",panel)
+	namesP:Dock(LEFT)
+	local valuesP = vgui.Create("DListLayout", panel)
+	valuesP:Dock(RIGHT)
+
+	for k,v in pairs(self.resources) do
+		local np = vgui.Create("DLabel",namesP)
+			np:SetFont("Trebuchet18")
+			np:SetText(k)
+			namesP:Add(np)
+			local vp =vgui.Create("DLabel",valuesP)
+			vp:SetText(v)
+			vp:SetFont("Trebuchet18")
+			valuesP:Add(vp)
+			--save pointer to update values
+			panel[k]=vp
+	end
+	namesP:SizeToContents()
+	valuesP:SizeToContents()
+	panel:SizeToContents()
+	panel:SetVisible(show)
+
+	local frac = self
+	function panel:UpdateValues()
+		--PrintTable(frac.resources)
+		for k,v in pairs(frac.resources) do
+			self[k]:SetText(v)
+		end
+	end
+
+	function panel:Think()
+		self.LastUpdateTime = self.LastUpdateTime or CurTime()
+
+		if(CurTime()-self.LastUpdateTime > 0.5) then
+			self.LastUpdateTime = CurTime()
+			self:UpdateValues()
+		end
+
+	end
+
+	local frame = vgui.Create("DFrame" )
+	frame:Add(panel)
+	frame:SetSize(140,100)
+	return panel
 
 end
 
@@ -177,7 +256,7 @@ function ENT:ShowInterface(ply)
 end
 
 function ENT:SetGuiVisible(show)
-	print("AAAAAAAAAAAAAAAAAA")
+	--print("AAAAAAAAAAAAAAAAAA")
 	for k,v in pairs(self.InterfaceElements) do
 		print(k .. ": ")
 		print(v)
@@ -188,36 +267,31 @@ end
 
 function ENT:SelectUnit(ent)
 	
-	self:FillUnitPanel(ent)
+	self:ShowUnitPanel(ent)
 	
 end
 
-function ENT:FillUnitPanel(ent)
+function ENT:UnSelectUnit(ent)
+	local unitPanel = self.InterfaceElements["UnitsPanel"]
+	unitPanel:SetVisible(false)
+end
+
+function ENT:ShowUnitPanel(ent)
 
 	local unitPanel = self.InterfaceElements["UnitsPanel"]
-	
-	unitPanel:Clear()
-	
-	local name = vgui.Create("DLabel",unitPanel)
-	name:SetText(ent.PrintName)
-	name:SetPos(10,5)
-	
-	local icon = vgui.Create("DImage",unitPanel)
-	icon:SetImage(ent:GetPortrait())
-	icon:SetSize(60,60)
-	icon:SetPos(10,30)
-	
-	local HPBar = vgui.Create("DProgress",unitPanel)	
-	HPBar:SetPos( 70, 30 )
-	HPBar:SetSize( 200, 20 )
-	HPBar:SetFraction(ent:GetHealthPoints()/ent:GetMaxHealth())
-	
-	local description = vgui.Create("DLabel",unitPanel)
-	description:SetPos(70,40)
-	description:SetSize(200,60)
-	description:SetMultiline(true)
-	description:SetText(ent.Description)
-	
+	unitPanel:SetVisible(true)
+	unitPanel.InfoBox.NameLabel:SetText(ent:GetName()) 
+	unitPanel.InfoBox.HPBar:SetFraction(ent:GetHealthPoints()/ent:GetMaxHealth())
+	unitPanel.InfoBox.DescriptionLabel:SetText(ent:GetDescription())
+	unitPanel.InfoBox.DescriptionLabel:SizeToContents()
+	unitPanel.PortraitBox:SetImage(ent:GetPortrait())
+	--unitPanel.PortraitHullPanel:SizeToContentsX() -- doesnt affect
+	--unitPanel.PortraitHullPanel:SetSize(100,70) -- does affect
+
+	--unitPanel.PortraitBox:SetKeepAspect(true)
+	--unitPanel.PortraitBox:SetSize(60,60)
+	unitPanel:SetFunctionsButtons(ent)
+
 	--unitPanel:SetBackgroundColor(Color(0,0,0,200))
 	
 	--unitPanel:Clear()

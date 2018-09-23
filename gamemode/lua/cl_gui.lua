@@ -35,10 +35,10 @@ function ShowPlayerInfos()
 	
 	local ply = LocalPlayer()
 	
-	surface.SetTextColor( 0,222,50)
+	--[[surface.SetTextColor( 0,222,50)
 	surface.SetTextPos( 50, 30 )
 	surface.DrawText( "Gold: " .. ply:GetNWInt("Gold"))
-
+	]]
 	
 	--surface.DrawOutlinedRect(100,100,200,200)
 	
@@ -46,6 +46,7 @@ function ShowPlayerInfos()
 	
 end
 
+-- is not in use
 function DrawHealthBars()
 		if(selectedEntities) then
 		for k,v in pairs(selectedEntities) do
@@ -118,7 +119,6 @@ hook.Add("GUIMousePressed","gui_mouse_pressed_select_ent",function(key,vector)
 					if(ent) then
 						for k,v in pairs (selectedEntities) do
 							--print(v)
-							
 							ExecEntityFunctionTmp(v,"SetEnemy",{ent})
 						end
 					
@@ -183,25 +183,27 @@ hook.Add("GUIMouseReleased","gui_mouse_release_select_ent",function(key,vector)
 				
 				x1,y1,x2,y2 = GetSelectBoxCoordinates()
 				if(x2-x1 < 10 or y2-y1 <10) then return end
-				
-				selectedEntities ={}
+				print(x1,x2,y1,y2)
+				UnSelectAllEntities()
 				
 				for k,v in pairs(ents.GetAll()) do 
-				
+					
 					if(v.Selectable) then
 						
 						point= v:GetPos():ToScreen()
 						 
 						x= point.x
 						y=point.y
-						--print(x,y)
+						print(x,y)
+						
 						--print(v)
-						if(x>x1 and x<x2 and y>y1 and y<x2) then
+						if(x>x1 and x<x2 and y>y1 and y<y2) then
 							SelectEntity(v,true)
 						end
 					end
 					
 				end
+				
 				posFirstClick = nil
 		end
 	end
@@ -220,28 +222,7 @@ function SelectEntity(ent, add)
 		UnSelectAllEntities()
 		selectedEntities= {ent}
 	end
-	--[[
-	local funcs = {}
-	local entFunctions = ent.Functions or {}
 	
-	for k, v in pairs(entFunctions) do
-		--print ("BBBBB:" .. k)
-		--PrintTable(v)
-		--print(v["Name"] .. k .. "   AAAAA")
-		if(v["ExecOn"] == "server") then
-			funcs[v["Name"] ] = function()
-				
-				ExecEntityFunction(ent,k) 
-			end
-		
-		else
-			funcs[v["Name"] ] = funcs[v["Function"] ]
-		end 
-		
-	end
-	
-	--SetOptionsOnPanel(funcs)
-	--]]
 end
 
 function UnSelectEntity(ent)

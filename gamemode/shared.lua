@@ -13,7 +13,7 @@ local file = file
 function AddDir(dir) // recursively adds everything in a directory to be downloaded by client
 	local list = file.Find("*","../"..dir.."")
 	for _, fdir in pairs(list) do
-		if fdir != ".svn" then // don't spam people with useless .svn folders
+		if fdir != ".svn" then -- don't spam people with useless .svn folders
 			AddDir(dir.."/"..fdir)
 		end
 	end

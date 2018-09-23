@@ -58,5 +58,5 @@ function ENT:OnSelect()
 end
 
 function ENT:GetPortrait()
-	return "materials/portraits/kaserne.png"
+	return self.Icon
 end

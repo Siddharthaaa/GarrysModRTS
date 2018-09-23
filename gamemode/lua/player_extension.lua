@@ -23,6 +23,7 @@ end
 
 function GM:PlayerInitialSpawn( ply )
 	
+	--TODO Fraction choose Menu
 	local fraction = ents.Create("fraction_base")
 	fraction:Spawn()
 	ply:SetFraction(fraction)
@@ -34,8 +35,8 @@ function ply:Think()
 	
 
 end
- 
- function ply:CanPayCosts(costs)
+ -- depricated
+function ply:CanPayCosts(costs)
 	for k, v in pairs(costs) do
 		
 		if(self:GetNWInt(k,0) < v) then
@@ -45,10 +46,10 @@ end
 	end
 	
 	return true
- end
+end
  
- 
- function ply:PayCosts(costs)
+ -- depricated
+function ply:PayCosts(costs)
 	
 	if(!self:CanPayCosts(costs)) then return false end
 	
@@ -60,8 +61,10 @@ end
 
 end
 
+
 function ply:SetFraction(frac)
 
+	frac:RegisterPlayer(self)
 	self:SetNWEntity("Fraction",frac)
 
 end

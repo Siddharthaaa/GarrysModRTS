@@ -7,11 +7,15 @@ ENT.Type			= "nextbot"
 ENT.Base 			= "base_nextbot"
 ENT.Spawnable		= true
 
+ENT.PrintName = "Prototyp-Bot"
+
 ENT.Selectable	= true
 ENT.IsSelected=false
 ENT.Model="models/humans/group01/female_01.mdl" 
 ENT.Model="models/alyx.mdl" 
 ENT.Spawnable = true
+
+ENT.Icon = "materials/portraits/soldier_1.png"
 
 ENT.Weapon = nil
 
@@ -19,6 +23,13 @@ ENT.AutomaticFrameAdvance = true
 
 ENT.Description = "Der Erste Bot \nLäuft komisch und schießt aus den Augen"
 
+function ENT:GetName()
+	return self.PrintName or "NoName"
+end
+
+function ENT:GetDescription()
+	return self.Description or "NoDescription"
+end
 
 function ENT:SetupDataTables()
 	local fl=0

@@ -20,5 +20,5 @@ function ENT:Think()
 end
 
 function ENT:GetPortrait()
-	return "materials/portraits/soldier_1.png"
+	return self.Icon
 end

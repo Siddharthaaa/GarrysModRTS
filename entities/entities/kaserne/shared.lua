@@ -11,8 +11,17 @@ ENT.Functions ={}
 
 ENT.Model = "models/hunter/tubes/tubebend2x2x90.mdl"
 
-ENT.Description = "Eine Kaserne, welche unermüdlich\n Soldaten produziert"
+ENT.Icon = "materials/portraits/kaserne.png"
 
+ENT.Description = "Eine Kaserne, welche unermüdlich Soldaten produziert"
+
+function ENT:GetName()
+	return self.PrintName or "NoName"
+end
+
+function ENT:GetDescription()
+	return self.Description or "NoDescription"
+end
 
 function ENT:SetupDataTables()
 	local fl=0
@@ -44,12 +53,11 @@ ENT.Functions["1"] = {["Name"]="Soldat",
 		["Description"]="Create a Unit",
 		--["Function"] = ENT.CreateZombie,
 		["Function"] = function(self)
-						local ent = createEntity("base_kibot",self:GetPos()+Vector(0,70,0)) 
-							ent:SetTargetPos(self:GetPos() + self:GetAngles():Right()*-200 + Vector(math.random(-100,100),math.random(-100,100),0))
-						end,
+			self:BuildUnit("base_kibot")
+			end,
 		
 		["ExecOn"] ="server",
-		["TimeCost"] = 5.0,
+		["TimeCost"] = 3.0,
 		["Costs"] = {["Gold"]=100}
 		
 		}

@@ -8,6 +8,8 @@ util.AddNetworkString("ExecFunctionOnEntity")
 util.AddNetworkString("ExecFunctionOnEntityTmp")
 util.AddNetworkString("Clicker_on")
 
+util.AddNetworkString("SetSynchronizedVariablesOnEntity")
+
 
 net.Receive("CreateEntity",function(len, ply)
 
@@ -44,6 +46,22 @@ net.Receive("ExecFunctionOnEntity", function(len,ply)
 	end
 end)
 
+--synchronized all named variables to the client
+function UpDateOnClient(ent,namesTable,players)
+	local table = {}
+	--PrintTable(players)
+	for k,v in pairs(namesTable) do
+		table[v] = ent[v]
+	end
+	
+	for k,ply in pairs(players) do
+		net.Start("SetSynchronizedVariablesOnEntity", false)
+		net.WriteEntity(ent)
+		net.WriteTable(table)
+		net.Send(ply)
+	end
+end
+
 function CanExecEntityFunction(ply,func)
 	if (func == nil) then return false end
 	
@@ -64,3 +82,4 @@ net.Receive("ExecFunctionOnEntityTmp", function(len,ply)
 		func(ent, unpack(opts))
 	end
 end)
+

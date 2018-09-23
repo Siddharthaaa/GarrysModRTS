@@ -2,12 +2,14 @@ ENT.IsSelected = false
 ENT.IsSelectable = true
 function ENT:Select()
 	self.IsSelected = true
-	self:OnSelect()
 	
-	local frac = self:GetFraction()
-	if(IsValid(frac) ) then
-		print(frac)
-		frac:SelectUnit(self)
+	
+	if(self.GetFraction != nil) then
+		local frac = self:GetFraction()
+		if(IsValid(frac) ) then
+			if(frac.SelectUnit != nil) then
+			frac:SelectUnit(self) end
+		end
 	end
 	
 	--self:EmitSound("BereitZuDienen.wav")
@@ -17,8 +19,21 @@ function ENT:OnSelect()
 end
 
 function ENT:UnSelect()
-	self.IsSelected = false
+	self.IsSelected = false	
 	
+	if(self.GetFraction != nil) then
+		local frac = self:GetFraction()
+		if(IsValid(frac) ) then
+			if(frac.UnSelectUnit != nil) then
+			frac:UnSelectUnit(self) end
+		end
+	end
+	self:OnUnSelect()
+
+end
+
+function ENT:OnUnSelect()
+
 end
 
 function ENT.IsSelectable()

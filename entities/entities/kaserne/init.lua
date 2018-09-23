@@ -64,3 +64,10 @@ function ENT:OnDestroy(damage)
 	--self:BecomeRagdoll( dmginfo )
 
 end
+
+function ENT:BuildUnit(entName)
+	local ent = createEntity(entName,self:GetPos()+Vector(0,70,0)) 
+	ent:SetTargetPos(self:GetPos() + self:GetAngles():Right()*-200 + Vector(math.random(-100,100),math.random(-100,100),0))
+	ent:SetFraction(self:GetFraction())
+						
+end

@@ -116,8 +116,8 @@ function SWEP:PrimaryAttack()
 	local bullet = {} 
 		bullet.Num = self.Primary.NumberofShots //The number of shots fired
 		--bullet.Num = 10//The number of shots fired
-		bullet.Src = scr //Gets where the bullet comes from
-		bullet.Dir = dir //Gets where you're aiming
+		bullet.Src = scr --Gets where the bullet comes from
+		bullet.Dir = dir --Gets where you're aiming
 		bullet.Spread = Vector( self.Primary.Spread * 0.1 , self.Primary.Spread * 0.1, 0)
                 //The above, sets how far the bullets spread from each other. 
 		bullet.Tracer = 1
@@ -185,7 +185,10 @@ function SWEP:CanPrimaryAttack()
 
 		self:EmitSound( "Weapon_Pistol.Empty" )
 		self:SetNextPrimaryFire( CurTime() + 1 )
-		self:GetOwner():StartActivity( ACT_RELOAD_PISTOL)
+		local owner = self:GetOwner()
+		if( owner.StartActivity != nil) then
+			self:GetOwner():StartActivity( ACT_RELOAD_PISTOL)
+		end
 		self:Reload()
 		self:SetClip1(self.Primary.ClipSize)
 		coroutine.wait(0.3)
