@@ -4,7 +4,7 @@ include ("lua/selectable_interface.lua")
 function ENT:Draw()
 	self:DrawModel()
 	
-	
+	self.ScreenPos = self:GetPos():ToScreen()
 	
 	if (self.IsSelected) then
 		self:DrawHealthBar()

@@ -97,13 +97,13 @@ function ENT:CreateMapPanel(show)
 			pos:Add(Vector(0,0,300))
 			origin = Vector(-40,200,-10700)
 			
-			render.RenderView( {
+			--[[render.RenderView( {
 			aspectratio = 1,
 			origin = origin,
 			angles = Angle( 90, 0, 0 ),
 			x = x, y = y,
 			w = w, h = h
-		} )
+		} )--]]
 	
 	end
 	panel:SetVisible(show)

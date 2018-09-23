@@ -190,10 +190,12 @@ hook.Add("GUIMouseReleased","gui_mouse_release_select_ent",function(key,vector)
 					
 					if(v.Selectable) then
 						
+						-- does not work here
+						-- must be done in 3D rendering context
 						point= v:GetPos():ToScreen()
-						 
-						x= point.x
-						y=point.y
+						
+						x= v.ScreenPos.x
+						y= v.ScreenPos.y
 						print(x,y)
 						
 						--print(v)
