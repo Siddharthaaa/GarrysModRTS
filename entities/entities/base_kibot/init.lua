@@ -4,6 +4,8 @@ AddCSLuaFile("shared.lua")
 
 include("shared.lua")
 
+include("../../lua/schedule.lua")
+
 ENT.Base 			= "base_nextbot"
 ENT.Spawnable		= true
 
@@ -15,7 +17,7 @@ end
 
 function ENT:Initialize()
 
-self:AddEFlags( EFL_FORCE_CHECK_TRANSMIT )
+	self:AddEFlags( EFL_FORCE_CHECK_TRANSMIT )
 
 	--self:SetModel( "models/player/Group01/Male_02.mdl" )
 	--self:SetModel( "models/Combine_Super_Soldier.mdl" )
@@ -31,6 +33,8 @@ self:AddEFlags( EFL_FORCE_CHECK_TRANSMIT )
 	self.SearchRadius 	= 1000	-- How far to search for enemies
 	self.Range = 500
 	
+	self.targetPos = {}
+	self.prefPos = self:GetPos()
 	
 	self:Give("pistol")
 	--self:Give("weapon_smg1")
@@ -79,7 +83,7 @@ function ENT:SetEnemy( ent )
 	if(ent == self) then return end
 	self.Enemy = ent
 	if(IsValid(ent)) then
-		self.targetPos = nil
+		self.targetPos = {}
 	end
 end
 function ENT:GetEnemy()
@@ -89,20 +93,27 @@ end
 
 
 
-function ENT:SetTargetPos(vec)
+function ENT:SetTargetPos(vec,add)
+
 	if(vec != nil) then
-		self.targetPos = Vector(vec)
-		self.loco:Approach(self.targetPos,1)
+		self.prefPos = vec
+		if(add) then
+			table.insert(self.targetPos,Vector(vec))
+		else
+			self.targetPos={}
+			self.targetPos[1]=Vector(vec)
+		end
+		self.loco:Approach(self.targetPos[1],1)
 		self:SetEnemy(nil)
 	else
-		self.targetPos = nil
+		self.targetPos = {}
 		--self.loco:Approach(self.targetPos,1)
 	end
 
 end
 
 function ENT:GetTargetPos()
-	return self.targetPos
+	return self.targetPos[1]
 end
 
 function ENT:BehaveAct()
@@ -123,9 +134,9 @@ function ENT:RunBehaviour()
 	
 	
 	while(true) do 
-		if(self.targetPos !=nil) then
-			local dis = self.targetPos:Distance(self:GetPos())
-			local tolerance = 70
+		if(self.targetPos[1] !=nil) then
+			local dis = self.targetPos[1]:Distance(self:GetPos())
+			local tolerance = 40
 			if(dis > tolerance) then
 				
 				local opts = {	lookahead = 300,
@@ -136,29 +147,26 @@ function ENT:RunBehaviour()
 				self:StartActivity( ACT_RUN  )	
 					
 				--self:MoveToPos(self.targetPos,opts)
-				self.loco:FaceTowards( self.targetPos )
-				self:ChasePos(self.targetPos,opts)
-				self:SetTargetPos(nil)
+				self.loco:FaceTowards( self.targetPos[1] )
+				self:ChasePos(self.targetPos[1],opts)
+				table.remove (self.targetPos,1)
 				
 				local actList = self:GetSequenceList()
 				local index  = math.random(1,#actList)
 				local seq = actList[index]
-			--print("DKFKLSDFKLSDFLKDFJ")
-			--print(index)
-			--print(seq)
+			
 				--self:PlaySequenceAndWait(seq,1)
 				self:StartActivity( ACT_RANGE_ATTACK1  )
 				--self:Attack()
 				self:StartActivity( ACT_IDLE )
-				--self:ChasePos(self.targetPos,opts)
 			end
 		end
 		
 		if(self:GetEnemy() and IsValid(self:GetEnemy())) then
 			
-			self:ChaseEnemy(self:GetEnemy())
+			self:ChaseEnemy()
 			self:StartActivity(ACT_RANGE_ATTACK1 )
-			self:StartActivity(ACT_RANGE_AIM_PISTOL_LOW )
+			--self:StartActivity(ACT_RANGE_AIM_PISTOL_LOW )
 			
 			self:SetPoseParameter( "aim_yaw", math.Clamp(30, -90, 90)  ) 
 		
@@ -170,6 +178,23 @@ function ENT:RunBehaviour()
 			self:StartActivity(self:GetSequenceActivity(812))
 			self:StartActivity(ACT_RANGE_AIM_PISTOL_LOW )
 			coroutine.wait(0.1)
+		end
+
+		
+		local enim = self:HasEnemy(self.Range*2)
+		self.hadEnemy = self.hadEnemy or false
+		if(enim != nil)then
+			self.hadEnemy = true
+			self:SetEnemy(enim)
+			self:ChaseEnemy()
+			self:Attack()
+			self:SetEnemy(nil)
+			
+		else
+			if(self.hadEnemy) then
+				self:SetTargetPos(self.prefPos or self:GetPos())
+				self.hadEnemy = false
+			end
 		end
 		
 		coroutine.yield()
@@ -185,19 +210,19 @@ function ENT:ChasePos(vec, options)
 	local path = Path( "Follow" )
 	path:SetMinLookAheadDistance( options.lookahead or 300 )
 	path:SetGoalTolerance( options.tolerance or 20 )
-	path:Compute( self, self.targetPos )		-- Compute the path towards the enemies position
+	path:Compute( self, self.targetPos[1] )		-- Compute the path towards position
 
 	if ( !path:IsValid() ) then return "failed" end
 	
-	local dist = self:GetPos():Distance(self.targetPos) 
+	local dist = self:GetPos():Distance(self.targetPos[1]) 
 	
 	--self.loco:SetAcceleration( 900 )
 	self:StartActivity( ACT_RUN  )
-	while ( path:IsValid() and dist > options.tolerance and self.targetPos) do
-		dist = self:GetPos():Distance(self.targetPos) 
+	while ( path:IsValid() and dist > options.tolerance and self.targetPos[1]) do
+		dist = self:GetPos():Distance(self.targetPos[1]) 
 		--print(dist,options.tolerance)
-		if ( path:GetAge() > options.repath or 0.1) then					-- Since we are following the player we have to constantly remake the path
-			path:Compute( self,self.targetPos )-- Compute the path towards the enemy's position again
+		if ( path:GetAge() > options.repath or 0.5) then					-- Since we are following the player we have to constantly remake the path
+			path:Compute( self,self.targetPos[1] )-- Compute the path towards the target position again
 		end
 		
 		path:Update( self )		-- This function moves the bot along the path
@@ -210,9 +235,9 @@ function ENT:ChasePos(vec, options)
 		end
 
 		coroutine.yield()
-
+		
 	end
-
+	
 	return "ok"
 
 end
@@ -227,6 +252,11 @@ function ENT:ChaseEnemy( options )
 
 	local options = options or {}
 	options.maxage= options.maxage or 1
+
+	local enm = self:GetEnemy()
+	if(enm == nil) then
+		return "noenemy"
+	end
 
 	local path = Path( "Follow" )
 	path:SetMinLookAheadDistance( options.lookahead or 300 )
@@ -290,7 +320,29 @@ function ENT:HasWeapon()
 	return IsValid(self:GetWeapon())
 end
 
+function ENT:IsEnemy(ent)
+	if(ent.GetFraction != nil)then
+		if(self:GetFraction() != ent:GetFraction() && !ent:IsPlayer()) then
+			return true
+		else 
+			return false
+		end
+	end
+	return false
+end
+
+function ENT:HasEnemy(range)
+	local ents = ents.FindInSphere(self.prefPos, range)
+	for k,v in pairs(ents) do
+		if(self:IsEnemy(v)) then
+			return v
+		end
+	end
+	return nil
+end
+
 function ENT:Attack()
+
 	if(self:HasWeapon()) then
 		self:GetWeapon():PrimaryAttack()
 	end

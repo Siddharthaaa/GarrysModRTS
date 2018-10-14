@@ -1,9 +1,6 @@
 AddCSLuaFile()
 
-selectedEntities = {}
-
 posFirstClick = {0,0}
-
 
 --at the cursor appended model and funcion
 appendedModel=nil
@@ -28,6 +25,21 @@ hook.Add("HUDPaint","PaintSelectionBox", function()
 	end
 )
 
+hook.Add("PlayerButtonDown","GroupsSelection",function(ply,button)
+
+	--print("TETEEETETETSTSTSTSTSTSTTTTTT")
+	if(button >= KEY_1 && button <=KEY_9) then
+		if(input.IsControlDown())then
+			ply:GetFraction():SetUnitGroup(button)
+		else
+			ply:GetFraction():SelectUnitGroup(button)
+		end
+			
+	end
+
+
+end)
+
 
 function ShowPlayerInfos()
 	
@@ -48,7 +60,8 @@ end
 
 -- is not in use
 function DrawHealthBars()
-		if(selectedEntities) then
+		local selectedEntities = LocalPlayer():GetFraction():GetSelectedEnts()
+		if(#selectedEntities>0) then
 		for k,v in pairs(selectedEntities) do
 			if(IsValid(v) and v.GetHealthPoints != nil) then
 				local vec = v:GetPos()
@@ -79,6 +92,9 @@ function DrawHealthBars()
 end
 
 function GetSelectBoxCoordinates()
+	if(posFirstClick == nil) then
+		return 0,0,0,0
+	end
 
 			local x1 = posFirstClick[1]
 			local y1 = posFirstClick[2]
@@ -110,7 +126,7 @@ end)
 
 
 hook.Add("GUIMousePressed","gui_mouse_pressed_select_ent",function(key,vector)
-			
+			local selectedEntities = LocalPlayer():GetFraction():GetSelectedEnts()
 			--Give a Order to the Selected Entitys
 			if (key == MOUSE_RIGHT)then
 				if(selectedEntities != nil) then
@@ -127,7 +143,7 @@ hook.Add("GUIMousePressed","gui_mouse_pressed_select_ent",function(key,vector)
 						for k,v in pairs (selectedEntities) do
 								--print(v)
 								local tr = util.QuickTrace( LocalPlayer():GetShootPos(), vector*10000, LocalPlayer() )
-								ExecEntityFunctionTmp(v,"SetTargetPos",{tr.HitPos})
+								ExecEntityFunctionTmp(v,"SetTargetPos",{tr.HitPos,input.IsKeyDown(KEY_LCONTROL)})
 								--ExecEntityFunctionTmp(v,"SetEnemy",{nil})
 								
 						end
@@ -139,17 +155,25 @@ hook.Add("GUIMousePressed","gui_mouse_pressed_select_ent",function(key,vector)
 			if (key == MOUSE_LEFT) then
 				
 				posFirstClick = {gui.MousePos()}
-				UnSelectAllEntities()
-				SelectEntity(GetEntityOnMouse())
+				local ent = GetEntityOnMouse()
+				if(ent !=nil) then
+					ent:Select(input.IsShiftDown())
+				else
+					if(!input.IsShiftDown()) then
+						LocalPlayer():GetFraction():UnSelectAllUnits()
+					end
+				end
+				--print(input.IsShiftDown())
 					
 			else
-				--old function. please dont use this
-				--setDefaultOptions()
+				
 			end
 			
 		end
-	)
+)
 	
+
+
 function GetEntityOnMouse()
 	local tr = util.QuickTrace( LocalPlayer():GetShootPos(), gui.ScreenToVector( gui.MousePos() )*1000000, LocalPlayer() )
 			--PrintTable(tr)
@@ -157,10 +181,9 @@ function GetEntityOnMouse()
 	--print(tr.Entity)
 		return tr.Entity
 	end
-	
-	return nil
-					
 
+	return nil
+				
 end
 
 hook.Add("GUIMousePressed","mousePressedAppendedEnt",function(key,vector)
@@ -182,25 +205,33 @@ hook.Add("GUIMouseReleased","gui_mouse_release_select_ent",function(key,vector)
 				
 				
 				x1,y1,x2,y2 = GetSelectBoxCoordinates()
-				if(x2-x1 < 10 or y2-y1 <10) then return end
+				if(x2-x1 < 10 or y2-y1 <10) then 
+					
+					--LocalPlayer():GetFraction():UnSelectAllUnits()
+					return
+				end
 				print(x1,x2,y1,y2)
-				UnSelectAllEntities()
+				if(! input.IsShiftDown()) then 
+					LocalPlayer():GetFraction():UnSelectAllUnits()
+				end
 				
 				for k,v in pairs(ents.GetAll()) do 
-					
-					if(v.Selectable) then
+					if(v.IsSelectable != nil and v.IsSelectable()) then
 						
 						-- does not work here
 						-- must be done in 3D rendering context
-						point= v:GetPos():ToScreen()
+						--point= v:GetPos():ToScreen()
 						
-						x= v.ScreenPos.x
-						y= v.ScreenPos.y
+						
+						local vDir=v:GetPos() - LocalPlayer():EyePos()
+
+						x,y,vis = VectorToLPCameraScreen(vDir,ScrW(),ScrH(),LocalPlayer():EyeAngles(),LocalPlayer():GetFOV()/180*3,1415 )
+
 						print(x,y)
 						
 						--print(v)
 						if(x>x1 and x<x2 and y>y1 and y<y2) then
-							SelectEntity(v,true)
+							v:Select(true)
 						end
 					end
 					
@@ -211,36 +242,6 @@ hook.Add("GUIMouseReleased","gui_mouse_release_select_ent",function(key,vector)
 	end
 )
 
-function SelectEntity(ent, add)
-	
-	if(!IsValid(ent)) then return false end
-	
-	ent:Select()
-	
-	if(add) then
-		selectedEntities[#selectedEntities+1] = ent
-		
-	else
-		UnSelectAllEntities()
-		selectedEntities= {ent}
-	end
-	
-end
-
-function UnSelectEntity(ent)
-	if(!IsValid(ent)) then return end 
-	ent:UnSelect()
-	
-	table.remove(selectedEntities,getElemIndexInTable(selectedEntities,ent))
-end
-
-function UnSelectAllEntities()
-		for k,v in pairs(selectedEntities) do 
-			UnSelectEntity(v)
-		
-		end
-end
-
 function getElemIndexInTable(tab, element)
 	for pos, v in pairs(tab) do 
 		if v == element then
@@ -250,53 +251,7 @@ function getElemIndexInTable(tab, element)
 
 end
 
---[[
-function SetOptionsOnPanel(funcs)
-	local existingElements = optionsGrid:GetItems()
-	--PrintTable(existingElements)
-	--print (#existingElements)
-	for i=#existingElements,1,-1  do
-		optionsGrid:RemoveItem(existingElements[i])
-		--print (i)
-		--print (" deleted")
-	
-	end
-	for name, func in pairs(funcs) do
-		local butt = vgui.Create("DButton")
-		butt:SetSize(50,50)
-		butt:SetText(name)
-		butt.DoClick = func
-		optionsGrid:AddItem(butt)
-	end
-end
 
-function setDefaultOptions()
-	SetOptionsOnPanel({["kaserne"]=function()
-		--local tr = LocalPlayer():GetEyeTrace()
-		
-		local func = function ()
-			local tr = util.QuickTrace( LocalPlayer():GetShootPos(), gui.ScreenToVector( gui.MousePos() )*10000, LocalPlayer() )
-			createEntity("kaserne",tr.HitPos + Vector(0,0,5)) 
-		end
-		
-		appendEntOnMouse("kaserne", func)
-		
-	end,
-	
-	["Protobot"]=function()
-		--local tr = LocalPlayer():GetEyeTrace()
-		
-		local func = function ()
-			local tr = util.QuickTrace( LocalPlayer():GetShootPos(), gui.ScreenToVector( gui.MousePos() )*10000, LocalPlayer() )
-			createEntity("base_kibot",tr.HitPos + Vector(0,0,5)) 
-		end
-		
-		appendEntOnMouse("base_kibot", func)
-		
-	end})
-end
-
---]]
 
 function appendEntOnMouse(entName, func)
 	removeEntOnMouse()
@@ -348,3 +303,84 @@ setDefaultOptions()
 
 --]]
 
+
+--[[
+Give this function the coordinates of a pixel on your screen, and it will return a unit vector pointing
+in the direction that the camera would project that pixel in.
+ 
+Useful for converting mouse positions to aim vectors for traces.
+ 
+iScreenX is the x position of your cursor on the screen, in pixels.
+iScreenY is the y position of your cursor on the screen, in pixels.
+iScreenW is the width of the screen, in pixels.
+iScreenH is the height of the screen, in pixels.
+angCamRot is the angle your camera is at
+fFoV is the Field of View (FOV) of your camera in ___radians___
+	Note: This must be nonzero or you will get a divide by zero error.
+ ]]--
+ function LPCameraScreenToVector( iScreenX, iScreenY, iScreenW, iScreenH, angCamRot, fFoV )
+    --This code works by basically treating the camera like a frustrum of a pyramid.
+    --We slice this frustrum at a distance "d" from the camera, where the slice will be a rectangle whose width equals the "4:3" width corresponding to the given screen height.
+    local d = 4 * iScreenH / ( 6 * math.tan( 0.5 * fFoV ) )	;
+ 
+    --Forward, right, and up vectors (need these to convert from local to world coordinates
+    local vForward = angCamRot:Forward();
+    local vRight   = angCamRot:Right();
+    local vUp      = angCamRot:Up();
+ 
+    --Then convert vec to proper world coordinates and return it 
+    return ( d * vForward + ( iScreenX - 0.5 * iScreenW ) * vRight + ( 0.5 * iScreenH - iScreenY ) * vUp ):Normalize();
+end
+ 
+--[[
+Give this function a vector, pointing from the camera to a position in the world,
+and it will return the coordinates of a pixel on your screen - this is where the world position would be projected onto your screen.
+ 
+Useful for finding where things in the world are on your screen (if they are at all).
+ 
+vDir is a direction vector pointing from the camera to a position in the world
+iScreenW is the width of the screen, in pixels.
+iScreenH is the height of the screen, in pixels.
+angCamRot is the angle your camera is at
+fFoV is the Field of View (FOV) of your camera in ___radians___
+	Note: This must be nonzero or you will get a divide by zero error.
+ 
+Returns x, y, iVisibility.
+	x and y are screen coordinates.
+	iVisibility will be:
+		1 if the point is visible
+		0 if the point is in front of the camera, but is not visible
+		-1 if the point is behind the camera
+]]--
+function VectorToLPCameraScreen( vDir, iScreenW, iScreenH, angCamRot, fFoV )
+	--Same as we did above, we found distance the camera to a rectangular slice of the camera's frustrum, whose width equals the "4:3" width corresponding to the given screen height.
+	local d = 4 * iScreenH / ( 6 * math.tan( 0.5 * fFoV ) );
+	local fdp = angCamRot:Forward():Dot( vDir );
+ 
+	--fdp must be nonzero ( in other words, vDir must not be perpendicular to angCamRot:Forward() )
+	--or we will get a divide by zero error when calculating vProj below.
+	if fdp == 0 then
+		return 0, 0, -1
+	end
+ 
+	--Using linear projection, project this vector onto the plane of the slice
+	local vProj = ( d / fdp ) * vDir;
+ 
+	--Dotting the projected vector onto the right and up vectors gives us screen positions relative to the center of the screen.
+	--We add half-widths / half-heights to these coordinates to give us screen positions relative to the upper-left corner of the screen.
+	--We have to subtract from the "up" instead of adding, since screen coordinates decrease as they go upwards.
+	local x = 0.5 * iScreenW + angCamRot:Right():Dot( vProj );
+	local y = 0.5 * iScreenH - angCamRot:Up():Dot( vProj );
+ 
+	--Lastly we have to ensure these screen positions are actually on the screen.
+	local iVisibility
+	if fdp < 0 then			--Simple check to see if the object is in front of the camera
+		iVisibility = -1;
+	elseif x < 0 || x > iScreenW || y < 0 || y > iScreenH then	--We've already determined the object is in front of us, but it may be lurking just outside our field of vision.
+		iVisibility = 0;
+	else
+		iVisibility = 1;
+	end
+ 
+	return x, y, iVisibility;
+end

@@ -35,6 +35,7 @@ function ply:Think()
 	
 
 end
+
  -- depricated
 function ply:CanPayCosts(costs)
 	for k, v in pairs(costs) do
