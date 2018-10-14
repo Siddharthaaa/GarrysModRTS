@@ -1,13 +1,20 @@
 include ("shared.lua")
 include("lua/cl_communication.lua")
+include ("lua/selectable_interface.lua")
 
 function ENT:Draw()
 
 	
 	self:DrawModel()
 	--self:DrawEntityOutline(1)
+	if (self.IsSelected) then
+		self:DrawHealthBar(1000,75)
+	end
 	
 end
+
+--internal function
+
 
 local matOutlineWhite 	= Material( "white_outline" )
 local ScaleNormal		= 0
@@ -42,4 +49,14 @@ function ENT:DrawEntityOutline( size )
 	local col = self:GetColor()
 	render.SetColorModulation( col.r/255, col.g/255, col.b/255 )
 
+end
+
+
+function ENT:OnSelect()
+	print("ONSELCT")
+	--self:GetFraction():SelectUnit(self)
+end
+
+function ENT:GetPortrait()
+	return self.Icon
 end

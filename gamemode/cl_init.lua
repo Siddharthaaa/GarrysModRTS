@@ -2,11 +2,10 @@ include( "shared.lua" )
 
 include("lua/cl_gui.lua")
 include("lua/cl_communication.lua")
+include("lua/player_extension.lua")
+
 
 gui.EnableScreenClicker( true ) 
-
-
-
 
 local hide = {
 	["CHudHealth"] = true,

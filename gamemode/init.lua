@@ -3,6 +3,8 @@ AddCSLuaFile( "shared.lua" )
 AddCSLuaFile( "lua/cl_gui.lua" )
 AddCSLuaFile( "lua/cl_communication.lua" )
 AddCSLuaFile( "lua/communication.lua" )
+AddCSLuaFile( "lua/schedule.lua" )
+AddCSLuaFile( "lua/selectable_interface" )
 AddCSLuaFile( "lua/player_extension.lua" )
 
 
@@ -20,15 +22,21 @@ function removeEntity(ent)
 	ent:Remove()
 
 end
+
 function GM:PlayerSpawn(ply)
 	ply:SetMoveType( 	MOVETYPE_NOCLIP    )
+
+	-- depricated. it will not be used
 	ply:SetNWInt("Gold",1000)
+	--if (ply:GetFraction() == nil) then
+		--ply:SetFraction(ents.Create("fraction"))
+	--end
 	
 end
 
 
-function createEntity(name,pos)
-
+function createEntity(name,pos, angle)
+	angle = angle || Angle(0, 0, 0)
 	local ent = ents.Create(name)
 	--print(IsValid(ent))
 	--PrintTable(scripted_ents.GetList())
@@ -38,6 +46,7 @@ function createEntity(name,pos)
 	
 	
 	ent:SetPos(pos)
+	ent:SetAngles(angle)
 	ent:Spawn()
 	return ent
 		

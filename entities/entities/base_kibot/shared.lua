@@ -1,4 +1,6 @@
 AddCSLuaFile()
+AddCSLuaFile ("lua/selectable_interface.lua")
+--AddCSLuaFile("lua/ent_ext/schedule.lua")
 
 --ENT.Type			= "ai"
 --ENT.Base 			= "base_entity"
@@ -7,14 +9,29 @@ ENT.Type			= "nextbot"
 ENT.Base 			= "base_nextbot"
 ENT.Spawnable		= true
 
-ENT.Selectable	= true
+ENT.PrintName = "Prototyp-Bot"
+
 ENT.Model="models/humans/group01/female_01.mdl" 
 ENT.Model="models/alyx.mdl" 
 ENT.Spawnable = true
 
+ENT.Functions ={}
+
+ENT.Icon = "materials/portraits/soldier_1.png"
+
 ENT.Weapon = nil
 
 ENT.AutomaticFrameAdvance = true
+
+ENT.Description = "Der Erste Bot \nLäuft komisch und schießt aus den Augen"
+
+function ENT:GetName()
+	return self.PrintName or "NoName"
+end
+
+function ENT:GetDescription()
+	return self.Description or "NoDescription"
+end
 
 function ENT:SetupDataTables()
 	local fl=0
@@ -27,10 +44,22 @@ function ENT:SetupDataTables()
 	
     self:NetworkVar("Float",fl , "HealthPoints") ;fl=fl+1-- 
 	self:NetworkVar("Entity",ent,"Weapon"); ent=ent+1
-	
+	self:NetworkVar("Entity",ent,"Fraction"); ent=ent+1
 	
 
 end
+
+
+ENT.Functions["0"] = {["Name"]="Verrat",
+		["Description"]="Make a unit hostile",
+		["ExecOn"] ="server",
+		["Function"] = function(self) local fraction = ents.Create("fraction_base")
+			fraction:Spawn()
+			self:SetFraction(fraction) end,
+		["TimeCost"] = 0,
+		["Costs"] = {["Gold"]=0}
+		
+		}
 
 function ENT:HasWeapon()
 	--print("HAAAAAAAAAAAAAAAAAAAAAHAHAHAHHA")

@@ -32,7 +32,7 @@ SWEP.DrawAmmo = true // Does the ammo show up when you are using it? True / Fals
  
 SWEP.ReloadSound = "sound/owningyou.wav" // Reload sound, you can use the default ones, or you can use your own; Example; "sound/myswepreload.wav" 
  
-SWEP.base = "weapon_base" //What your weapon is based on.
+SWEP.base = "weapon_pistol" //What your weapon is based on.
 //General settings\\
  
 //PrimaryFire Settings\\ 
@@ -116,8 +116,8 @@ function SWEP:PrimaryAttack()
 	local bullet = {} 
 		bullet.Num = self.Primary.NumberofShots //The number of shots fired
 		--bullet.Num = 10//The number of shots fired
-		bullet.Src = scr //Gets where the bullet comes from
-		bullet.Dir = dir //Gets where you're aiming
+		bullet.Src = scr --Gets where the bullet comes from
+		bullet.Dir = dir --Gets where you're aiming
 		bullet.Spread = Vector( self.Primary.Spread * 0.1 , self.Primary.Spread * 0.1, 0)
                 //The above, sets how far the bullets spread from each other. 
 		bullet.Tracer = 1
@@ -184,8 +184,11 @@ function SWEP:CanPrimaryAttack()
 	if ( self:Clip1() <= 0 ) then
 
 		self:EmitSound( "Weapon_Pistol.Empty" )
-		self:SetNextPrimaryFire( CurTime() + 2 )
-		self:GetOwner():StartActivity( ACT_RELOAD_PISTOL)
+		self:SetNextPrimaryFire( CurTime() + 1 )
+		local owner = self:GetOwner()
+		if( owner.StartActivity != nil) then
+			self:GetOwner():StartActivity( ACT_RELOAD_PISTOL)
+		end
 		self:Reload()
 		self:SetClip1(self.Primary.ClipSize)
 		coroutine.wait(0.3)
