@@ -1,6 +1,9 @@
+AddCSLuaFile()
+
+
 ENT.IsSelected = false
 ENT.IsSelectable = true
-function ENT:Select()
+function ENT:Select(add)
 	self.IsSelected = true
 	
 	
@@ -8,7 +11,7 @@ function ENT:Select()
 		local frac = self:GetFraction()
 		if(IsValid(frac) ) then
 			if(frac.SelectUnit != nil) then
-			frac:SelectUnit(self) end
+			frac:SelectUnit(self,add) end
 		end
 	end
 	
@@ -37,7 +40,7 @@ function ENT:OnUnSelect()
 end
 
 function ENT.IsSelectable()
-	return IsSelectable
+	return true
 end 
 
 function ENT:DrawHealthBar(length, height)

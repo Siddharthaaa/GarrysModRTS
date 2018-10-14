@@ -1,3 +1,5 @@
+AddCSLuaFile ("lua/selectable_interface.lua")
+
 ENT.Type = "anim"
 ENT.Base = "base_entity"
 

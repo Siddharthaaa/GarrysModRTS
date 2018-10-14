@@ -48,10 +48,10 @@ function ExecEntityFunction(ent, index)
 	
 end
 
-function ExecEntityFunctionTmp(ent, funcName,opts)
+function ExecEntityFunctionTmp(ent, funcName,args)
 	net.Start("ExecFunctionOnEntityTmp")
 	net.WriteEntity(ent)
 	net.WriteString(funcName)
-	net.WriteTable(opts)
+	net.WriteTable(args)
 	net.SendToServer()
 end

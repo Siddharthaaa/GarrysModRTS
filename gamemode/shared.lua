@@ -3,8 +3,11 @@ GM.Author = "N/A"
 GM.Email = "N/A"
 GM.Website = "N/A"
 
+AddCSLuaFile( "lua/player_extension.lua" )
 
-DeriveGamemode("sandbox");
+include( "lua/player_extension.lua" )
+
+--DeriveGamemode("sandbox");
 
 
 
@@ -106,3 +109,12 @@ function GM:Initialize()
 end
 
 -- shared
+
+function TableContains(tab,val)
+
+	for k, v in pairs(tab) do
+		if(v == val) then return true end
+	end
+	return false
+
+end

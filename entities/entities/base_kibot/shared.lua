@@ -1,4 +1,6 @@
 AddCSLuaFile()
+AddCSLuaFile ("lua/selectable_interface.lua")
+--AddCSLuaFile("lua/ent_ext/schedule.lua")
 
 --ENT.Type			= "ai"
 --ENT.Base 			= "base_entity"
@@ -9,11 +11,11 @@ ENT.Spawnable		= true
 
 ENT.PrintName = "Prototyp-Bot"
 
-ENT.Selectable	= true
-ENT.IsSelected=false
 ENT.Model="models/humans/group01/female_01.mdl" 
 ENT.Model="models/alyx.mdl" 
 ENT.Spawnable = true
+
+ENT.Functions ={}
 
 ENT.Icon = "materials/portraits/soldier_1.png"
 
@@ -46,6 +48,18 @@ function ENT:SetupDataTables()
 	
 
 end
+
+
+ENT.Functions["0"] = {["Name"]="Verrat",
+		["Description"]="Make a unit hostile",
+		["ExecOn"] ="server",
+		["Function"] = function(self) local fraction = ents.Create("fraction_base")
+			fraction:Spawn()
+			self:SetFraction(fraction) end,
+		["TimeCost"] = 0,
+		["Costs"] = {["Gold"]=0}
+		
+		}
 
 function ENT:HasWeapon()
 	--print("HAAAAAAAAAAAAAAAAAAAAAHAHAHAHHA")

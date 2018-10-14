@@ -5,6 +5,9 @@ function ENT:Draw()
 end
 
 function ENT:Initialize()
+
+	self.UnitGroups = {}
+	self.UnitGroups[0] = {}
 	
 	self.HasInterface = false
 	self.InterfaceElements ={}
@@ -97,13 +100,13 @@ function ENT:CreateMapPanel(show)
 			pos:Add(Vector(0,0,300))
 			origin = Vector(-40,200,-10700)
 			
-			--[[render.RenderView( {
+			render.RenderView( {
 			aspectratio = 1,
 			origin = origin,
 			angles = Angle( 90, 0, 0 ),
 			x = x, y = y,
 			w = w, h = h
-		} )--]]
+		} )
 	
 	end
 	panel:SetVisible(show)
@@ -156,9 +159,10 @@ function ENT:CreateSelectedUnitsPanel(show)
 	panel:SetBackgroundColor(Color(0,0,0,220))
 	
 	function panel:SetFunctionsButtons(ent)
+		self.ent = ent
 		local funcs = {}
 		local entFunctions = ent.Functions or {}
-		
+
 		for k, v in pairs(entFunctions) do
 			
 			if(v["ExecOn"] == "server") then
@@ -182,6 +186,14 @@ function ENT:CreateSelectedUnitsPanel(show)
 			self.FunktionsPanel:Add(butt)
 		end
 		
+	end
+
+	function panel:Think()
+		if(self.ent !=nil and IsValid(self.ent)) then
+			self.InfoBox.HPBar:SetFraction(self.ent:GetHealthPoints()/self.ent:GetMaxHealth())
+		else
+			self:SetVisible(false)
+		end
 	end
 
 	return panel 
@@ -265,15 +277,67 @@ function ENT:SetGuiVisible(show)
 
 end
 
-function ENT:SelectUnit(ent)
+function ENT:SelectUnit(ent, add)
+
+	if(TableContains(self.UnitGroups[0],ent)) then
+		return false
+	end
 	
+	--print(#self.UnitGroups[0])
+	add = add || false
+	if(add) then
+		
+		--print("ADD")
+		table.insert(self.UnitGroups[0],ent)
+	else
+		self:UnSelectAllUnits()
+		self.UnitGroups[0] = {ent}
+	end
 	self:ShowUnitPanel(ent)
+	--print(#self.UnitGroups[0])
+
 	
 end
 
 function ENT:UnSelectUnit(ent)
 	local unitPanel = self.InterfaceElements["UnitsPanel"]
 	unitPanel:SetVisible(false)
+	table.RemoveByValue(self.UnitGroups[0], ent)
+end
+
+function ENT:UnSelectAllUnits()
+	local gr = table.Copy(self.UnitGroups[0])
+	for k,v in pairs(gr) do
+		if(v != nil and v.UnSelect != nil) then
+			v:UnSelect()
+		end
+	end
+end
+
+function ENT:SetUnitGroup(id)
+	self.UnitGroups[id] = table.Copy(self.UnitGroups[0])
+end
+
+function ENT:SelectUnitGroup(id)
+
+	self:UnSelectAllUnits()
+	if(self.UnitGroups[id]==nil) then
+		return
+	end
+	
+	self.UnitGroups[0] = {}
+	for k,v in pairs(self.UnitGroups[id]) do
+		--print("TEETETETETETE AAAAAAAAAAAA")
+		if(v != nil and v.Select != nil) then
+			v:Select(true)
+		end
+	end
+	
+	return self.UnitGroups[0]
+end
+
+function ENT:GetSelectedEnts()
+	return table.Copy(self.UnitGroups[0])
 end
 
 function ENT:ShowUnitPanel(ent)

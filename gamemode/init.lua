@@ -3,6 +3,8 @@ AddCSLuaFile( "shared.lua" )
 AddCSLuaFile( "lua/cl_gui.lua" )
 AddCSLuaFile( "lua/cl_communication.lua" )
 AddCSLuaFile( "lua/communication.lua" )
+AddCSLuaFile( "lua/schedule.lua" )
+AddCSLuaFile( "lua/selectable_interface" )
 AddCSLuaFile( "lua/player_extension.lua" )
 
 
@@ -23,6 +25,8 @@ end
 
 function GM:PlayerSpawn(ply)
 	ply:SetMoveType( 	MOVETYPE_NOCLIP    )
+
+	-- depricated. it will not be used
 	ply:SetNWInt("Gold",1000)
 	--if (ply:GetFraction() == nil) then
 		--ply:SetFraction(ents.Create("fraction"))
@@ -42,6 +46,7 @@ function createEntity(name,pos, angle)
 	
 	
 	ent:SetPos(pos)
+	ent:SetAngles(angle)
 	ent:Spawn()
 	return ent
 		
